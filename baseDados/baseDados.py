@@ -9,6 +9,7 @@ def connect():
         return mydb
     except:
         print("Erro ao aceder base dados.")
+        return None
 
 
 def disconnect(connection):
