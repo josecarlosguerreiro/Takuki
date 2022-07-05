@@ -84,10 +84,28 @@ def getAwayGames(team, round):
     disconnect(conn)
     return myresult
 
+def getAllTeamGames(team, round):
+    conn = connect()
+    mycursor = conn.cursor()
+    sql = "SELECT * FROM games where (home_team = '" + team + "' and away_team = '" + team + "')" + " and round <= '" + str(round) + "'"
+    mycursor.execute(sql)
+    myresult = mycursor.fetchall()
+    disconnect(conn)
+    return myresult
+
 def updateTotalGoals(homeTeam, awayTeam, round, goals):
     conn = connect()
     mycursor = conn.cursor()
     sql = "update games set total_goals = '" + str(goals) + "' where home_team = '" + homeTeam + "' and away_team = '" + awayTeam + "' and round = '" + str(round) + "'"
+    mycursor.execute(sql)
+    conn.commit()
+    disconnect(conn)
+
+
+def updateTakuki(game_id, over05, over15, over25, over35):
+    conn = connect()
+    mycursor = conn.cursor()
+    sql = "update games set takuki05 = '" +str(over05) + "', takuki15 = '" + str(over15) + "', takuki25 = '" + str(over25) + "', takuki35 = '" + str(over35) + "' where id = '" + str(game_id) + "'"
     mycursor.execute(sql)
     conn.commit()
     disconnect(conn)
