@@ -84,8 +84,10 @@ def getHomeGames(team, round):
     over05_home = 0
     over15_home = 0
     over25_home = 0
+    total_goals = 0
     res = db.getHomeGames(team, round-1)
     for game in res:
+        print("RES " + str(game))
         total_games += 1
         if game[7] > game[8]:
             total_wins += 1
@@ -95,14 +97,14 @@ def getHomeGames(team, round):
             total_draws += 1
             total_points += 1
         else: total_lose += 1
+        print("equipa casa " + team + "jornada " + str(round-1))
+        total_goals = total_goals + game[14]
 
-        total_goals = (game[7] + game[8]) / 2
-
-        if total_goals > 0:
+        if game[14] > 0:
             over05_home += 1
-            if total_goals > 1.5:
+            if game[14] > 1.5:
                 over15_home += 1
-                if total_goals > 2.5:
+                if game[14] > 2.5:
                     over25_home += 1
                 else:
                     pass
@@ -111,8 +113,8 @@ def getHomeGames(team, round):
         else:
             pass
 
-    scored += game[7]
-    against += game[8]
+        scored += game[7]
+        against += game[8]
     return [game[0], total_games, total_wins, total_draws, total_lose, scored, against, total_points, over05_home, over15_home, over25_home]
 
 def getAwayGames(team, round):
@@ -126,7 +128,8 @@ def getAwayGames(team, round):
     over05_away = 0
     over15_away = 0
     over25_away = 0
-    res = db.getHomeGames(team, round - 1)
+    total_goals = 0
+    res = db.getAwayGames(team, round - 1)
     for game in res:
         #print(game)
         total_games += 1
@@ -139,13 +142,13 @@ def getAwayGames(team, round):
         else:
             total_lose += 1
 
-        total_goals = (game[7] + game[8]) / 2
+        total_goals = total_goals + game[14]
 
-        if total_goals > 0:
+        if game[14] > 0:
             over05_away += 1
-            if total_goals > 1.5:
+            if game[14] >= 1.5:
                 over15_away += 1
-                if total_goals > 2.5:
+                if game[14] >= 2.5:
                     over25_away += 1
                 else:
                     pass
@@ -154,8 +157,8 @@ def getAwayGames(team, round):
         else:
             pass
 
-        scored += game[7]
-        against += game[8]
+        scored += game[8]
+        against += game[7]
     return [game[0], total_games, total_wins, total_draws, total_lose, scored, against, total_points, over05_away, over15_away, over25_away ]
 
 

@@ -20,35 +20,38 @@ def getDate(date_row):
     end_date_str = str(start_date_str).split('<')
     game_date = str(end_date_str[1])
     game_date2 = str(game_date).split(',')[1].replace(' ', '').replace('\'', '').replace('-', '').replace('\\n','')
-    if 'Jan' in game_date2:
-        game_dt = game_date2.replace('Jan', '01')
-    elif 'Feb' in game_date2:
-        game_dt = game_date2.replace('Feb', '02')
-    elif 'Mar' in game_date2:
-        game_dt = game_date2.replace('Mar', '03')
-    elif 'Apr' in game_date2:
-        game_dt = game_date2.replace('Apr', '04')
-    elif 'May' in game_date2:
-        game_dt = game_date2.replace('May', '05')
-    elif 'Jun' in game_date2:
-        game_dt = game_date2.replace('Jun', '06')
-    elif 'Jul' in game_date2:
-        game_dt = game_date2.replace('Jul', '07')
-    elif 'Aug' in game_date2:
-        game_dt = game_date2.replace('Aug', '08')
-    elif 'Sep' in game_date2:
-        game_dt = game_date2.replace('Sep', '09')
-    elif 'Oct' in game_date2:
-        game_dt = game_date2.replace('Oct', '10')
-    elif 'Nov' in game_date2:
-        game_dt = game_date2.replace('Nov', '11')
-    elif 'Dec' in game_date2:
-        game_dt = game_date2.replace('Dec', '12')
+    if 'jan' in game_date2:
+        game_dt = game_date2.replace('jan', '01')
+    if 'fev' in game_date2:
+        game_dt = game_date2.replace('fev', '02')
+    if 'mar' in game_date2:
+        game_dt = game_date2.replace('mar', '03')
+    if 'abr' in game_date2:
+        game_dt = game_date2.replace('abr', '04')
+    if 'mai' in game_date2:
+        game_dt = game_date2.replace('mai', '05')
+    if 'jun' in game_date2:
+        game_dt = game_date2.replace('jun', '06')
+    if 'jul' in game_date2:
+        game_dt = game_date2.replace('jul', '07')
+    if 'ago' in game_date2:
+        game_dt = game_date2.replace('ago', '08')
+    if 'set' in game_date2:
+        game_dt = game_date2.replace('set', '09')
+    if 'out' in game_date2:
+        game_dt = game_date2.replace('out', '10')
+    if 'nov' in game_date2:
+        game_dt = game_date2.replace('nov', '11')
+    if 'dez' in game_date2:
+        game_dt = game_date2.replace('dez', '12')
+
+    print("GAME_DT: " + game_dt)
     return game_dt
 
 
 def getEpoca(game_date):
     game_date = str(game_date).split('.')
+#    print("get epoca.mes: " + game_date)
     mes = game_date[1]
     ano = game_date[2]
     if (mes >= '08') and (mes <= '12'):
