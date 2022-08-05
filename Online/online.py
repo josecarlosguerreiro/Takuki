@@ -18,7 +18,6 @@ def openURL(url):
         contador = html.count('{page}')
         for i in range(2, html.count('{page}') + 1):
            url = url + '/page/' + str(i)
-           print(url)
            abreURLCompleto(url)
     return row_list
 

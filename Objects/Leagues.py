@@ -1,4 +1,5 @@
 import re
+import datetime
 
 
 class obj_campeonato:
@@ -19,7 +20,8 @@ def getDate(date_row):
     start_date_str = str(date_line).split('>')
     end_date_str = str(start_date_str).split('<')
     game_date = str(end_date_str[1])
-    game_date2 = str(game_date).split(',')[1].replace(' ', '').replace('\'', '').replace('-', '').replace('\\n','')
+    game_date2 = str(game_date).split(',')[1].replace(' ', '').replace('\'', '').replace('-', '').replace('\\n', '')
+
     if 'jan' in game_date2:
         game_dt = game_date2.replace('jan', '01')
     if 'fev' in game_date2:
@@ -45,15 +47,26 @@ def getDate(date_row):
     if 'dez' in game_date2:
         game_dt = game_date2.replace('dez', '12')
 
-    print("GAME_DT: " + game_dt)
-    return game_dt
+    day = game_date2.split('.')[0]
+    month = game_dt.split('.')[1]
+    year = game_date2.split('.')[2]
+    #print("DAyYYY: " + str(day))
+    #print("month: " + str(month))
+    #print("year: " + str(year))
+    date_complete = datetime.datetime(int(year), int(month), int(day))
+    date = date_complete.strftime("%Y-%m-%d")
+    #print("DATA: " + str(date))
+    return date
 
 
 def getEpoca(game_date):
-    game_date = str(game_date).split('.')
-#    print("get epoca.mes: " + game_date)
+    '''
+    game_date: 2022-04-09
+    '''
+    game_date = str(game_date).split('-')
+    #    print("get epoca.mes: " + game_date)
     mes = game_date[1]
-    ano = game_date[2]
+    ano = game_date[0]
     if (mes >= '08') and (mes <= '12'):
         epoca = ano + '/' + str(int(ano) + 1)
     else:
@@ -69,7 +82,7 @@ def getResultado(res_line):
     if resultado.__contains__('-'):
         pass
     else:
-        resultado = ' - '
+        resultado = 'vs'
     return resultado
 
 
@@ -88,7 +101,7 @@ def getRound(round_line):
     round_3 = round_2[1].split('<')
     round = str(round_3[0])
     round = re.sub(r"[\n\t\s\n]*", "", round)
-    round = round.replace('J','')
+    round = round.replace('J', '')
     return round
 
 
@@ -104,7 +117,7 @@ def getTeam(soup_list):
 
 
 class obj_game:
-    def __init__(self, league, season, dt, round, home_team, away_team, home_goals, away_goals, realized):
+    def __init__(self, league, season, dt, round, home_team, away_team, home_goals, away_goals, realized, total_goals):
         self.league = league
         self.season = season
         self.game_date = dt
@@ -114,7 +127,28 @@ class obj_game:
         self.home_goals = home_goals
         self.away_goals = away_goals
         self.realized = realized
+        self.total_goals = total_goals
 
+    def obj_game(self, league, season, dt, round, home_team, away_team, home_goals, away_goals, realized, total_goals):
+        self.league = league
+        self.season = season
+        self.game_date = dt
+        self.round = round
+        self.home_team = home_team
+        self.away_team = away_team
+        self.home_goals = home_goals
+        self.away_goals = away_goals
+        self.realized = realized
+        self.total_goals = total_goals
+    '''
+    def __init__(self, league, season, dt, round, home_team, away_team):
+        self.league = league
+        self.season = season
+        self.game_date = dt
+        self.round = round
+        self.home_team = home_team
+        self.away_team = away_team
+    '''
     def getLeague(self):
         return self.league
 
@@ -141,3 +175,6 @@ class obj_game:
 
     def getRealized(self):
         return self.realized
+
+    def getTotalGoals(self):
+        return self.total_goals

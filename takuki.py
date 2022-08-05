@@ -1,28 +1,98 @@
-#!/usr/bin/python
-# import re
-# import sqlite3
-# import subprocess
-# import os
-# import mechanize
-# import ssl
-# import urllib.request
-# import time
-# from bs4 import BeautifulSoup
-# import urllib2
-# import urllib.request as urllib2
-# import database as db
-from datetime import date
-
 import baseDados.baseDados as db
 import Online.online as online
 import Objects.Leagues as obj
-
-today = date.today()
+import datetime
+#from datetime import date
 
 # dd/mm/YY
-dta_today = today.strftime("%d.%m.%Y")
+#dta_today = date.today().strftime("%d.%m.%Y")
+dta_today = datetime.date.today().strftime("%Y-%m-%d")
+gameList = []
 
-def gamesAndResults(row_list, league):
+
+def getHomeGames(team, round, homeAway):
+    scored = 0
+    against = 0
+    total_games = 0
+    total_wins = 0
+    total_draws = 0
+    total_lose = 0
+    total_points = 0
+    over05_home = 0
+    over15_home = 0
+    over25_home = 0
+    over05_away = 0
+    over15_away = 0
+    over25_away = 0
+    total_goals = 0
+
+    if homeAway == 'home':
+        res = db.getHomeGames(team, round - 1)
+        for game in res:
+            total_games += 1
+            if game[7] > game[8]:
+                total_wins += 1
+                total_points += 3
+
+            elif game[7] == game[8]:
+                total_draws += 1
+                total_points += 1
+            else:
+                total_lose += 1
+            total_goals = total_goals + game[14]
+
+            if game[14] > 0:
+                over05_home += 1
+                if game[14] > 1.5:
+                    over15_home += 1
+                    if game[14] > 2.5:
+                        over25_home += 1
+                    else:
+                        pass
+                else:
+                    pass
+            else:
+                pass
+            scored += int(game[7])
+            against += int(game[8])
+        return [game[0], total_games, total_wins, total_draws, total_lose, scored, against, total_points, over05_home,
+                over15_home, over25_home]
+    else:
+        res = db.getAwayGames(team, round - 1)
+        for game in res:
+            total_games += 1
+            if game[8] > game[7]:
+                total_wins += 1
+                total_points += 3
+            elif game[7] == game[8]:
+                total_draws += 1
+                total_points += 1
+            else:
+                total_lose += 1
+
+            total_goals = game[8] + game[7]
+
+            if game[14] > 0:
+                over05_away += 1
+                if game[14] >= 1.5:
+                    over15_away += 1
+                    if game[14] >= 2.5:
+                        over25_away += 1
+                    else:
+                        pass
+                else:
+                    pass
+            else:
+                pass
+
+            scored += int(game[8])
+            against += int(game[7])
+        return [game[0], total_games, total_wins, total_draws, total_lose, scored, against, total_points, over05_away,
+                over15_away, over25_away]
+
+
+def createGames(row_list, league):
+    total_goals = ' '
     for item in row_list:
         for td in item:
             rows = td.find_all('td')
@@ -50,139 +120,51 @@ def gamesAndResults(row_list, league):
             else:
                 home_goals = obj.golosCasa(resultado)
                 away_goals = obj.golosFora(resultado)
+                total_goals = int(home_goals) + int(away_goals)
             round_row = rows[5]
             round = obj.getRound(round_row)
-            dd, dm, dy = [int(x) for x in date_game.split('.')]
-            dd1, dm1, dy1 = [int(x) for x in dta_today.split('.')]
-
-            dt_game = date(dy, dm, dd)
-            dt_today = date(dy1, dm1, dd1)
-            if dt_today > dt_game:
+            #dy, dm, dd = [int(x) for x in date_game.split('-')]
+            #dy1, dm1, dd1 = [int(x) for x in dta_today.split('-')]
+            #dt_game = date(dy, dm, dd)
+            #dt_today = date(dy1, dm1, dd1)
+            if (dta_today > date_game) and resultado.__contains__('vs'):
+                realized = 'A'
+            elif dta_today > date_game:
                 realized = 'Y'
             else:
                 realized = 'N'
-            game = obj.obj_game(league, season, date_game, round, home_team, team_away, home_goals, away_goals, realized)
-            '''
-            verify if game already exists on db. if so, don't add the game
+
+            game = obj.obj_game(league, season, date_game, round, home_team, team_away, home_goals, away_goals,
+                                realized, total_goals)
+            gameList.append(game)
             '''
             res = db.getGame(game)
-            if res is None:
+            if res is None:  # game does not exists
                 db.addGame(game)
-            else: pass
-
+            elif res[9] == 'N' and realized == 'Y':  # update game with goals and realized set to Y
+                upd_game = obj.obj_game.obj_game(league, season, date_game, round, home_team, team_away, home_goals,
+                                        away_goals, realized, total_goals)
+                db.updateGame(res[0], upd_game)
+            else:
+                pass
+            '''
     return 0
 
 
-def getHomeGames(team, round):
-    scored = 0
-    against = 0
-    total_games = 0
-    total_wins = 0
-    total_draws = 0
-    total_lose = 0
-    total_points = 0
-    over05_home = 0
-    over15_home = 0
-    over25_home = 0
-    total_goals = 0
-    res = db.getHomeGames(team, round-1)
-    for game in res:
-        print("RES " + str(game))
-        total_games += 1
-        if game[7] > game[8]:
-            total_wins += 1
-            total_points += 3
-
-        elif game[7] == game[8]:
-            total_draws += 1
-            total_points += 1
-        else: total_lose += 1
-        print("equipa casa " + team + "jornada " + str(round-1))
-        total_goals = total_goals + game[14]
-
-        if game[14] > 0:
-            over05_home += 1
-            if game[14] > 1.5:
-                over15_home += 1
-                if game[14] > 2.5:
-                    over25_home += 1
-                else:
-                    pass
-            else:
-                pass
-        else:
-            pass
-
-        scored += game[7]
-        against += game[8]
-    return [game[0], total_games, total_wins, total_draws, total_lose, scored, against, total_points, over05_home, over15_home, over25_home]
-
-def getAwayGames(team, round):
-    scored = 0
-    against = 0
-    total_games = 0
-    total_wins = 0
-    total_draws = 0
-    total_lose = 0
-    total_points = 0
-    over05_away = 0
-    over15_away = 0
-    over25_away = 0
-    total_goals = 0
-    res = db.getAwayGames(team, round - 1)
-    for game in res:
-        #print(game)
-        total_games += 1
-        if game[8] > game[7]:
-            total_wins += 1
-            total_points += 3
-        elif game[7] == game[8]:
-            total_draws += 1
-            total_points += 1
-        else:
-            total_lose += 1
-
-        total_goals = total_goals + game[14]
-
-        if game[14] > 0:
-            over05_away += 1
-            if game[14] >= 1.5:
-                over15_away += 1
-                if game[14] >= 2.5:
-                    over25_away += 1
-                else:
-                    pass
-            else:
-                pass
-        else:
-            pass
-
-        scored += game[8]
-        against += game[7]
-    return [game[0], total_games, total_wins, total_draws, total_lose, scored, against, total_points, over05_away, over15_away, over25_away ]
-
-
-def inicialLoad():
-    leagues = db.getLeagues()
-
-    #for league in leagues:
-    #    print("#############################")
-    #    print(league)
-    return leagues
+def carregaLigas():
+    ligas = db.getLeagues()
+    return ligas
 
 
 def menu():
     cont = 0
-    tip_over05 = ""
-    tip_over15 = ""
-    tip_over25 = ""
-
+    print("HOJE:" + str(dta_today))
     print("###########################################")
     print("##                                       ##")
     print("##               TAKUKI by JCG           ##")
     print("##                                       ##")
     print("###########################################\n\n")
-    leagues = inicialLoad()
+    leagues = carregaLigas()
     for i, league in enumerate(leagues):
         i += 1
         print(str(i) + " - " + league[1] + " - " + league[2])
@@ -197,174 +179,210 @@ def menu():
     just for development
     int_league = 1
     '''
-    int_league = 1
+    int_league = 5
     if int_league <= cont:
         if int_league == 0:
             print("Not developed yet")
         else:
-            country_league = leagues[int_league-1]
+            country_league = leagues[int_league - 1]
             country = country_league[1]
             league = country_league[2]
             year = country_league[3]
             link = country_league[4]
             active = country_league[5]
             row_list = online.openURL(link)
-            gamesAndResults(row_list, league)
+            createGames(row_list, league)
     else:
-        print("Opcao Invalida. Por favor escolhe uma opcao correta")
+        print("Invalid option. Please select a correct one")
         return -1
 
-    '''
-    Get all games from db to memory
-    '''
-    allgames = db.getAllGames(league)
-
-    for game_tupple in allgames:
-        if int(game_tupple[4]) == 1:
-            db.updateTotalGoals(game_tupple[5], game_tupple[6], int(game_tupple[4]),
-                                int(game_tupple[7]) + int(game_tupple[8]))
-            pass
-        if int(game_tupple[4]) <= 5:
-            '''
-            game_tupple[0] --> id
-            game_tupple[1] --> league
-            game_tupple[2] --> season
-            game_tupple[3] --> game_date
-            game_tupple[4] --> round
-            game_tupple[5] --> home_team
-            game_tupple[6] --> away_team
-            game_tupple[7] --> home_goals
-            game_tupple[8] --> away_goals
-            game_tupple[9] --> realized            
-            '''
-            #[home_total_games, home_total_wins, home_total_draws, home_total_lose, home_scored, home_against, home_total_points] = getHomeGames(game_tupple[5], int(game_tupple[4]))
-            #[away_total_games, away_total_wins, away_total_draws, away_total_lose, away_scored, away_against, away_total_points] = getAwayGames(game_tupple[6], int(game_tupple[4]))
-            #print("UPDATE TOTAL GOALS")
-            db.updateTotalGoals(game_tupple[5], game_tupple[6], int(game_tupple[4]), int(game_tupple[7]) + int(game_tupple[8]))
-            #print("game_tupple[5]:" + game_tupple[5] + " home_total_games: " + str(home_total_games) )
-
-            #pass
+    for game in gameList:
+        # verify if game already exists
+        #print("JORNADA: " + game.getRound())
+        #print("ID: " + str(game[0]))
+        res = db.getGame(game)
+        if res is None:
+            db.addGame(game)
         else:
             pass
-            #home team games - team 1 home games
-            [game_id_t1, home_games_t1, home_wins_t1, home_draws_t1, home_loose_t1, home_scored_t1, home_against_t1,
-             home_points_t1, t1_over05_home, t1_over15_home, t1_over25_home] = getHomeGames(game_tupple[5], int(game_tupple[4]))
-            # home team games - team 1 away games
-            [game_id_t1, away_games_t1, away_wins_t1, away_draws_t1, away_loose_t1, away_scored_t1, away_against_t1,
-             away_points_t1, t1_over05_away, t1_over15_away, t1_over25_away] = getAwayGames(game_tupple[5], int(game_tupple[4]))
-
-            #away team games - team 2 away games
-            [game_id_t1, away_games_t2, away_wins_t2, away_draws_t2, away_loose_t2, away_scored_t2, away_against_t2,
-             away_points_t2, t2_over05_away, t2_over15_away, t2_over25_away] = getAwayGames(game_tupple[6], int(game_tupple[4]))
-
-            # away team games - team 2 home games
-            [game_id_t2, home_games_t2, home_wins_t2, home_draws_t2, home_loose_t2, home_scored_t2, home_against_t2,
-             home_points_t2, t2_over05_home, t2_over15_home, t2_over25_home] = getHomeGames(game_tupple[6], int(game_tupple[4]))
-
-            #home teams - team 1 - OVERALL - total games, goals, victories, etc
-
-            t1_played = home_games_t1 + away_games_t1
-            t1_win = home_wins_t1 + away_wins_t1
-            t1_draw = home_draws_t1 + away_draws_t1
-            t1_loose = home_loose_t1 + away_loose_t1
-            t1_goals_scores = home_scored_t1 + away_scored_t1
-            t1_goals_against = home_against_t1 + away_against_t1
-            t1_diff_goals = t1_goals_scores - t1_goals_against
-            t1_total_under25 = t1_played - (t1_over25_home + t1_over25_away)
-            t1_total_over25 = t1_over25_home + t1_over25_away
-
-            t2_played = home_games_t2 + away_games_t2
-            t2_win = home_wins_t2 + away_wins_t2
-            t2_draw = home_draws_t2 + away_draws_t2
-            t2_loose = home_loose_t2 + away_loose_t2
-            t2_goals_scores = home_scored_t2 + away_scored_t2
-            t2_goals_against = home_against_t2 + away_against_t2
-            t2_diff_goals = t2_goals_scores - t2_goals_against
-            t2_total_under25 = t2_played - (t2_over25_home + t2_over25_away)
-            t2_total_over25 = t2_over25_home + t2_over25_away
-
-            # Takuki calculations
-
-            t1_temp1 = ((home_scored_t1 / home_games_t1) + (away_against_t2 / away_games_t2)) / 2
-            t2_temp1 = ((home_against_t2 / away_games_t2) + (away_scored_t1 / home_games_t1)) / 2
-
-            t1_temp2 = ((t1_goals_scores / t1_played) + (t2_goals_against / t2_played)) / 2
-            t2_temp2 = ((t2_goals_scores / t2_played) + (t1_goals_against / t2_played)) / 2
-
-            t1_res = (t1_temp1 * 0.7) + (t1_temp2 * 0.3)
-            t2_res = (t2_temp1 * 0.7) + (t2_temp2 * 0.3)
-
-            t1_over = ((home_games_t1 - t1_over25_home) / home_games_t1) + ((away_games_t2 - t2_over25_away) / away_games_t2)
-            t2_over = (t1_over25_home / home_games_t1) + (t2_over25_away / away_games_t2)
-
-            t1_over_total = (t1_total_under25 / t1_played) + (t2_total_under25 / t2_played)
-            t2_over_total = (t1_total_over25 / t1_played) + (t2_total_over25 / t2_played)
-
-            t1_under = ((t1_over * 0.7) + (t1_over_total * 0.3)) / 2
-            t2_under = ((t2_over * 0.7) + (t2_over_total * 0.3)) / 2
-
-            t1_t2_res = t1_res + t2_res
-            t1_t2_under = t1_under - t2_under
-
-            t1_total = t1_t2_res * t1_t2_under
-            alpha_coeficient = 1 - t1_total
 
 
-            # calculations for overs - Over0.5
-
-            print("alpha_coeficient: " + str(alpha_coeficient))
-
-            if alpha_coeficient < 0:
-                tip_over05 = "UNDER"
+    nextRound = db.nextRound()[0]
+    print("NEXT ROUND: " + str(nextRound))
+    for game in gameList:
+        if int(game.getRound()) <= 5:
+            id_game = db.getGame(game)
+            db.updateGame(id_game[0], game)
+        else:
+            if dta_today > game.getData():
+                id_game = db.getGame(game)
+                db.updateGame(id_game[0], game)
             else:
-                if 0 < alpha_coeficient < 1:
-                    tip_over05 = "NO BET"
-                if alpha_coeficient > 1:
-                    tip_over05 = "OVER"
+                #calcular proxima jornada
+                id_game = db.getGame(game)
+                print("GAME ROUND____TEST: " + str(game.getRound()))
+                print("----------------- " + str(nextRound) + " --------------------------")
+                if int(game.getRound()) == nextRound:
+                    print("######################################")
+                    print("GAME ROUND: " + str(game.getRound()))
+                    print("EQUIPA CASA: " + game.getHomeTeam())
+                    print("EQUIPA FORA: " + game.getAwayTeam())
+                    # home team games - team 1 home games
+                    [game_id_t1, home_games_t1, home_wins_t1, home_draws_t1, home_loose_t1, home_scored_t1,
+                     home_against_t1,
+                     home_points_t1, t1_over05_home, t1_over15_home, t1_over25_home] = getHomeGames(game.getHomeTeam(),
+                                                                                                    int(game.getRound())-1,
+                                                                                                    'home')
+                    # home team games - team 1 away games
+                    [game_id_t1, away_games_t1, away_wins_t1, away_draws_t1, away_loose_t1, away_scored_t1,
+                     away_against_t1,
+                     away_points_t1, t1_over05_away, t1_over15_away, t1_over25_away] = getHomeGames(game.getHomeTeam(),
+                                                                                                    int(game.getRound())-1,
+                                                                                                    'away')
+                    # away team games - team 2 home games
+                    [game_id_t2, home_games_t2, home_wins_t2, home_draws_t2, home_loose_t2, home_scored_t2,
+                     home_against_t2,
+                     home_points_t2, t2_over05_home, t2_over15_home, t2_over25_home] = getHomeGames(game.getAwayTeam(),
+                                                                                                    int(game.getRound())-1,
+                                                                                                    'home')
 
-            # calculations for overs - Over1.5
+                    # away team games - team 2 away games
+                    [game_id_t1, away_games_t2, away_wins_t2, away_draws_t2, away_loose_t2, away_scored_t2,
+                     away_against_t2,
+                     away_points_t2, t2_over05_away, t2_over15_away, t2_over25_away] = getHomeGames(game.getAwayTeam(),
+                                                                                                    int(game.getRound())-1,
+                                                                                                    'away')
 
-            if alpha_coeficient < 1:
-                tip_over15 = "UNDER"
+                    # home teams - team 1 - OVERALL - total games, goals, victories, etc
+
+                    t1_played = home_games_t1 + away_games_t1
+                    t1_win = home_wins_t1 + away_wins_t1
+                    t1_draw = home_draws_t1 + away_draws_t1
+                    t1_loose = home_loose_t1 + away_loose_t1
+                    t1_goals_scores = home_scored_t1 + away_scored_t1
+                    t1_goals_against = home_against_t1 + away_against_t1
+                    t1_diff_goals = t1_goals_scores - t1_goals_against
+                    t1_total_under25 = t1_played - (t1_over25_home + t1_over25_away)
+                    t1_total_over25 = t1_over25_home + t1_over25_away
+
+                    t2_played = home_games_t2 + away_games_t2
+                    t2_win = home_wins_t2 + away_wins_t2
+                    t2_draw = home_draws_t2 + away_draws_t2
+                    t2_loose = home_loose_t2 + away_loose_t2
+                    t2_goals_scores = home_scored_t2 + away_scored_t2
+                    t2_goals_against = home_against_t2 + away_against_t2
+                    t2_diff_goals = t2_goals_scores - t2_goals_against
+                    t2_total_under25 = t2_played - (t2_over25_home + t2_over25_away)
+                    t2_total_over25 = t2_over25_home + t2_over25_away
+
+                    # Takuki calculations
+
+                    t1_temp1 = ((home_scored_t1 / home_games_t1) + (away_against_t2 / away_games_t2)) / 2
+                    t2_temp1 = ((away_scored_t2 / away_games_t2) + (away_against_t1 / home_games_t1)) / 2
+
+                    t1_temp2 = ((t1_goals_scores / t1_played) + (t2_goals_against / t2_played)) / 2
+                    t2_temp2 = ((t2_goals_scores / t2_played) + (t1_goals_against / t1_played)) / 2
+
+                    t1_res = (t1_temp1 * 0.7) + (t1_temp2 * 0.3)
+                    t2_res = (t2_temp1 * 0.7) + (t2_temp2 * 0.3)
+
+                    t1_over = ((home_games_t1 - t1_over25_home) / home_games_t1) + (
+                            (away_games_t2 - t2_over25_away) / away_games_t2)
+                    t2_over = (t1_over25_home / home_games_t1) + (t2_over25_away / away_games_t2)
+
+                    t1_over_total = (t1_total_under25 / t1_played) + (t2_total_under25 / t2_played)
+                    t2_over_total = (t1_total_over25 / t1_played) + (t2_total_over25 / t2_played)
+
+                    t1_under = ((t1_over * 0.7) + (t1_over_total * 0.3)) / 2
+                    t2_under = ((t2_over * 0.7) + (t2_over_total * 0.3)) / 2
+
+                    t1_t2_res = t1_res + t2_res
+                    t1_t2_under = t1_under - t2_under
+
+                    # t1_total = t1_t2_res * t1_t2_under
+                    alpha_coeficient = 1 - t1_t2_under
+                    total = t1_t2_res * alpha_coeficient
+
+                    # calculations for overs - Over0.5
+                    # print("JORNADA: " + str(nextRound))
+                    print("################################")
+                    # print("game ID: " + str(game[0]))
+                    # print("alpha_coeficient: " + str(alpha_coeficient))
+
+                    if total < 0:
+                        tip_over05 = "UNDER"
+                    else:
+                        if 0 < total < 1:
+                            tip_over05 = "NO BET"
+                        if total > 1:
+                            tip_over05 = "OVER"
+
+                    # calculations for overs - Over1.5
+
+                    if total < 1:
+                        tip_over15 = "UNDER"
+                    else:
+                        if 1 < total < 2:
+                            tip_over15 = "NO BET"
+                        if total > 2:
+                            tip_over15 = "OVER"
+
+                    # calculations for overs - Over2.5
+
+                    if total < 2:
+                        tip_over25 = "UNDER"
+                    else:
+                        if 2 < total < 3:
+                            tip_over25 = "NO BET"
+                        if total > 3:
+                            tip_over25 = "OVER"
+
+                    # calculations for overs - Over3.5
+
+                    if total < 3:
+                        tip_over35 = "UNDER"
+                    else:
+                        if 3 < total < 4:
+                            tip_over35 = "NO BET"
+                        if total > 4:
+                            tip_over35 = "OVER"
+
+                    db.updateTakuki(id_game[0], tip_over05, tip_over15, tip_over25, tip_over35)
+                else:
+                    pass
+
+
+
+    '''
+    for game in gameList:
+        db.addGame(game)
+        if int(game.getRound()) <= 5:  # round <= 5
+            print("JOGO JORNADA --> " + game.getRound())
+            print("JOGO Equipa CASA --> " + game.getHomeTeam())
+            print("JOGO Equipa FORA --> " + game.getAwayTeam())
+            print("############################")
+    '''
+    '''
+    a cada execução, tem de carregar os dados da academia das apostas e atualizar os golos 
+    '''
+
+
+'''
+    allgames = db.getAllGames(league)
+    #dta_today = '24.09.2021'
+    for game_tupple in allgames:
+        if int(game_tupple[4]) <= 5: #round <= 5
+            #pass
+            db.updateTotalGoals(game_tupple[5], game_tupple[6], int(game_tupple[4]), int(game_tupple[7]) + int(game_tupple[8]))
+        else:
+            if game_tupple[3] < dta_today:
+                db.updateTotalGoals(game_tupple[5], game_tupple[6], int(game_tupple[4]),
+                                    int(game_tupple[7]) + int(game_tupple[8]))
             else:
-                if 1 < alpha_coeficient < 2:
-                    tip_over15 = "NO BET"
-                if alpha_coeficient > 2:
-                    tip_over15 = "OVER"
+                pass
+                #calculate takuki
 
-            # calculations for overs - Over2.5
-
-            if alpha_coeficient < 2:
-                tip_over25 = "UNDER"
-            else:
-                if 2 < alpha_coeficient < 3:
-                    tip_over25 = "NO BET"
-                if alpha_coeficient > 3:
-                    tip_over25 = "OVER"
-
-
-
-            # calculations for overs - Over3.5
-
-            if alpha_coeficient < 3:
-                tip_over35 = "UNDER"
-            else:
-                if 3 < alpha_coeficient < 4:
-                    tip_over35 = "NO BET"
-                if alpha_coeficient > 4:
-                    tip_over35 = "OVER"
-
-
-
-
-
-            db.updateTakuki(game_tupple[0], tip_over05, tip_over15, tip_over25, tip_over35)
-            #db.updateTakuki(game_id_t2, tip_over05, tip_over15, tip_over25, tip_over35)
-
-            db.updateTotalGoals(game_tupple[5], game_tupple[6], int(game_tupple[4]),
-                                int(game_tupple[7]) + int(game_tupple[8]))
-
-            #int_league = int(input('Press enter to continue '))
+'''
 
 
 def main():
