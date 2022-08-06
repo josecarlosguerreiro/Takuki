@@ -231,26 +231,26 @@ def menu():
                     [game_id_t1, home_games_t1, home_wins_t1, home_draws_t1, home_loose_t1, home_scored_t1,
                      home_against_t1,
                      home_points_t1, t1_over05_home, t1_over15_home, t1_over25_home] = getHomeGames(game.getHomeTeam(),
-                                                                                                    int(game.getRound())-1,
+                                                                                                    int(game.getRound()),
                                                                                                     'home')
                     # home team games - team 1 away games
                     [game_id_t1, away_games_t1, away_wins_t1, away_draws_t1, away_loose_t1, away_scored_t1,
                      away_against_t1,
                      away_points_t1, t1_over05_away, t1_over15_away, t1_over25_away] = getHomeGames(game.getHomeTeam(),
-                                                                                                    int(game.getRound())-1,
+                                                                                                    int(game.getRound()),
                                                                                                     'away')
                     # away team games - team 2 home games
                     [game_id_t2, home_games_t2, home_wins_t2, home_draws_t2, home_loose_t2, home_scored_t2,
                      home_against_t2,
                      home_points_t2, t2_over05_home, t2_over15_home, t2_over25_home] = getHomeGames(game.getAwayTeam(),
-                                                                                                    int(game.getRound())-1,
+                                                                                                    int(game.getRound()),
                                                                                                     'home')
 
                     # away team games - team 2 away games
                     [game_id_t1, away_games_t2, away_wins_t2, away_draws_t2, away_loose_t2, away_scored_t2,
                      away_against_t2,
                      away_points_t2, t2_over05_away, t2_over15_away, t2_over25_away] = getHomeGames(game.getAwayTeam(),
-                                                                                                    int(game.getRound())-1,
+                                                                                                    int(game.getRound()),
                                                                                                     'away')
 
                     # home teams - team 1 - OVERALL - total games, goals, victories, etc
@@ -307,7 +307,11 @@ def menu():
                     # print("JORNADA: " + str(nextRound))
                     print("################################")
                     # print("game ID: " + str(game[0]))
-                    # print("alpha_coeficient: " + str(alpha_coeficient))
+                    print("t1_res: " + str(t1_res))
+                    print("t2_res: " + str(t2_res))
+                    print("alpha_coeficient: " + str(alpha_coeficient))
+                    print("alpha_coeficient: " + str(alpha_coeficient))
+                    print("res_total: " + str(t1_t2_res))
 
                     if total < 0:
                         tip_over05 = "UNDER"
@@ -347,7 +351,7 @@ def menu():
                         if total > 4:
                             tip_over35 = "OVER"
 
-                    db.updateTakuki(id_game[0], tip_over05, tip_over15, tip_over25, tip_over35)
+                    db.updateTakuki(id_game[0], tip_over05, tip_over15, tip_over25, tip_over35, total)
                 else:
                     pass
 
