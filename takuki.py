@@ -170,16 +170,11 @@ def menu():
         print(str(i) + " - " + league[1] + " - " + league[2])
         cont = i
     print("0 - All leagues")
-    '''
+
     int_league = int(input('Witch league do you want? '))
     print("You chosed " + str(int_league))
     print("Cont " + str(cont))
-    '''
-    '''
-    just for development
-    int_league = 1
-    '''
-    int_league = 5
+
     if int_league <= cont:
         if int_league == 0:
             print("Not developed yet")
@@ -196,23 +191,23 @@ def menu():
         print("Invalid option. Please select a correct one")
         return -1
 
+    country_league = leagues[int_league - 1]
+    country = country_league[1]
+
+
     for game in gameList:
-        # verify if game already exists
-        #print("JORNADA: " + game.getRound())
-        #print("ID: " + str(game[0]))
         res = db.getGame(game)
         if res is None:
-            db.addGame(game)
+            db.addGame(country, game)
         else:
             pass
-
-
-    nextRound = db.nextRound()[0]
-    print("NEXT ROUND: " + str(nextRound))
+    nextRound = db.nextRound(country)[0]
     for game in gameList:
         if int(game.getRound()) <= 5:
-            id_game = db.getGame(game)
-            db.updateGame(id_game[0], game)
+            if dta_today > game.getData():
+                id_game = db.getGame(game)
+                db.updateGame(id_game[0], game)
+            else: pass
         else:
             if dta_today > game.getData():
                 id_game = db.getGame(game)
@@ -220,13 +215,8 @@ def menu():
             else:
                 #calcular proxima jornada
                 id_game = db.getGame(game)
-                print("GAME ROUND____TEST: " + str(game.getRound()))
-                print("----------------- " + str(nextRound) + " --------------------------")
                 if int(game.getRound()) == nextRound:
-                    print("######################################")
-                    print("GAME ROUND: " + str(game.getRound()))
-                    print("EQUIPA CASA: " + game.getHomeTeam())
-                    print("EQUIPA FORA: " + game.getAwayTeam())
+
                     # home team games - team 1 home games
                     [game_id_t1, home_games_t1, home_wins_t1, home_draws_t1, home_loose_t1, home_scored_t1,
                      home_against_t1,
@@ -303,15 +293,6 @@ def menu():
                     alpha_coeficient = 1 - t1_t2_under
                     total = t1_t2_res * alpha_coeficient
 
-                    # calculations for overs - Over0.5
-                    # print("JORNADA: " + str(nextRound))
-                    print("################################")
-                    # print("game ID: " + str(game[0]))
-                    print("t1_res: " + str(t1_res))
-                    print("t2_res: " + str(t2_res))
-                    print("alpha_coeficient: " + str(alpha_coeficient))
-                    print("alpha_coeficient: " + str(alpha_coeficient))
-                    print("res_total: " + str(t1_t2_res))
 
                     if total < 0:
                         tip_over05 = "UNDER"
@@ -350,44 +331,10 @@ def menu():
                             tip_over35 = "NO BET"
                         if total > 4:
                             tip_over35 = "OVER"
-
+                    #print("updateTakuki:" + str(id_game[0]) + " | " + str(tip_over15) + " | " + str(tip_over25) + " | " + str(tip_over35) + " | " + str(total))
                     db.updateTakuki(id_game[0], tip_over05, tip_over15, tip_over25, tip_over35, total)
                 else:
                     pass
-
-
-
-    '''
-    for game in gameList:
-        db.addGame(game)
-        if int(game.getRound()) <= 5:  # round <= 5
-            print("JOGO JORNADA --> " + game.getRound())
-            print("JOGO Equipa CASA --> " + game.getHomeTeam())
-            print("JOGO Equipa FORA --> " + game.getAwayTeam())
-            print("############################")
-    '''
-    '''
-    a cada execução, tem de carregar os dados da academia das apostas e atualizar os golos 
-    '''
-
-
-'''
-    allgames = db.getAllGames(league)
-    #dta_today = '24.09.2021'
-    for game_tupple in allgames:
-        if int(game_tupple[4]) <= 5: #round <= 5
-            #pass
-            db.updateTotalGoals(game_tupple[5], game_tupple[6], int(game_tupple[4]), int(game_tupple[7]) + int(game_tupple[8]))
-        else:
-            if game_tupple[3] < dta_today:
-                db.updateTotalGoals(game_tupple[5], game_tupple[6], int(game_tupple[4]),
-                                    int(game_tupple[7]) + int(game_tupple[8]))
-            else:
-                pass
-                #calculate takuki
-
-'''
-
 
 def main():
     menu()

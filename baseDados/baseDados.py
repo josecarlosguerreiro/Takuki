@@ -33,12 +33,15 @@ def getLeagues():
         return None
 
 
-def addGame(game):
+def addGame(pais, game):
     conn = connect()
     mycursor = conn.cursor()
-    mycursor.callproc('addGame', [game.getLeague(), game.getSeason(), game.getData(), game.getRound(),
-                                  game.getHomeTeam(), game.getAwayTeam(), game.getHomeGoals(), game.getAwayGoals(),
-                                  game.getRealized()])
+    sql = "insert into games (pais, league, season, game_date, round, home_team, away_team, realized) values " \
+          "('" + pais + "', '" + game.getLeague() + "', '" + game.getSeason() + "', '" + game.getData() +"', '"\
+    + str(game.getRound()) + "', '" + game.getHomeTeam() + "', '" + game.getAwayTeam() +"', '" + game.getRealized() + "')"
+    print("SQL: " + sql)
+    mycursor.execute(sql)
+
     conn.commit()
     disconnect(conn)
 
@@ -130,7 +133,7 @@ def updateTakuki(game_id, over05, over15, over25, over35, total):
     print("takuki25: " + over25)
     print("takuki35: " + over35)
     sql = "update games set takuki05 = '" + str(over05) + "', takuki15 = '" + str(over15) + "', takuki25 = '" + str(
-        over25) + "', takuki35 = '" + str(over35) + "', total = '" + str(total) + "' where id = '" + str(game_id) + "'"
+        over25) + "', takuki35 = '" + str(over35) + "', total_goals = '" + str(total) + "' where id = '" + str(game_id) + "'"
     print("QUERY: " + sql)
     mycursor.execute(sql)
     conn.commit()
@@ -176,10 +179,10 @@ def getMaxIdForRound(round):
     disconnect(conn)
     return res_id
 
-def nextRound():
+def nextRound(country):
     conn = connect()
     mycursor = conn.cursor()
-    sql = "SELECT min(round) FROM games where realized = 'N'"
+    sql = "SELECT min(round) FROM games where realized = 'N' and pais = '" + country + "'"
     mycursor.execute(sql)
     round = mycursor.fetchone()
     disconnect(conn)
