@@ -1,6 +1,6 @@
 import mysql.connector
 
-
+'''
 def connect():
     try:
         mydb = mysql.connector.connect(user='root', password='2111986kramermania',
@@ -22,7 +22,7 @@ def connect():
     except:
         print("Erro ao aceder base dados.")
         return None
-'''
+
 
 def disconnect(connection):
     try:

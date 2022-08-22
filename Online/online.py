@@ -13,6 +13,7 @@ def openURL(url):
     table_rows = tables[0].find_all('tr')
     #print(table_rows)
     row_list.append(table_rows)
+    print("HTML: " + str(html))
     if html.__contains__('{page}'):
         print('NUMERO DE PAGINAS --> ' + str(html.count('{page}')))
         contador = html.count('{page}')
