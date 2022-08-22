@@ -22,17 +22,6 @@ def connect():
     except:
         print("Erro ao aceder base dados.")
         return None
-
-def connect():
-    try:
-        mydb = mysql.connector.connect(user='jguerreiro', password='2111986kramermania',
-                                       host='joseguerreiro.ddns.net',
-                                       port=3306,
-                                       database='takuki')
-        return mydb
-    except:
-        print("Erro ao aceder base dados.")
-        return None
 '''
 
 def disconnect(connection):
