@@ -160,7 +160,7 @@ def carregaLigas():
     return ligas
 
 
-def menu():
+def takuki():
     cont = 0
 
     print("###########################################")
@@ -204,7 +204,8 @@ def menu():
             db.addGame(country, game)
         else:
             pass
-    nextRound = db.nextRound(country)[0]
+    nextRound = db.nextRound(country, league)[0]
+    print("PROXIMA JORNADA: " + str(nextRound))
     for game in gameList:
         if game.getRealized() == 'A':
             pass
@@ -222,7 +223,8 @@ def menu():
                     #calcular proxima jornada
                     id_game = db.getGame(game)
                     if int(game.getRound()) == nextRound:
-
+                        print("CALCULAR JORNADA: " + str(game.getRound()) + "jogo: " + str(
+                            game.getHomeTeam()) + " - " + str(game.getAwayTeam()))
                         # home team games - team 1 home games
                         [game_id_t1, home_games_t1, home_wins_t1, home_draws_t1, home_loose_t1, home_scored_t1,
                          home_against_t1,
@@ -343,8 +345,191 @@ def menu():
                         pass
     return
 
+def calcula_estatistica(pais,liga):
+    cursor = db.calcula_estatistica(pais,liga)
+
+    lista_tak_05 = []
+    lista_tak_15 = []
+    lista_tak_25 = []
+    lista_tak_35 = []
+    over_05 = 0.5
+    over_15 = 1.5
+    over_25 = 2.5
+    over_35 = 3.5
+    for i in cursor:
+        total_golos = i[14]
+        tak_05 = i[10]
+        tak_15 = i[11]
+        tak_25 = i[12]
+        tak_35 = i[13]
+
+        if total_golos >= over_05:
+            if tak_05 == 'NO BET':
+                pass
+            else:
+                temp_05 = 'OVER'
+                if tak_05 == temp_05:
+                    lista_tak_05.append('V')
+                else:
+                    lista_tak_05.append('F')
+        else:
+            if tak_05 == 'NO BET':
+                pass
+            else:
+                temp_05 = 'UNDER'
+                if tak_05 == temp_05:
+                    lista_tak_05.append('V')
+                else:
+                    lista_tak_05.append('F')
+
+        if total_golos >= over_15:
+            if tak_15 == 'NO BET':
+                pass
+            else:
+                temp_15 = 'OVER'
+                if tak_15 == temp_15:
+                    lista_tak_15.append('V')
+                else:
+                    lista_tak_15.append('F')
+        else:
+            if tak_15 == 'NO BET':
+                pass
+            else:
+                temp_15 = 'UNDER'
+                if tak_15 == temp_15:
+                    lista_tak_15.append('V')
+                else:
+                    lista_tak_15.append('F')
+
+        if total_golos >= over_25:
+            if tak_25 == 'NO BET':
+                pass
+            else:
+                temp_25 = 'OVER'
+                if tak_25 == temp_25:
+                    lista_tak_25.append('V')
+                else:
+                    lista_tak_25.append('F')
+        else:
+            if tak_25 == 'NO BET':
+                pass
+            else:
+                temp_25 = 'UNDER'
+                if tak_25 == temp_25:
+                    lista_tak_25.append('V')
+                else:
+                    lista_tak_25.append('F')
+
+        if total_golos >= over_35:
+            if tak_35 == 'NO BET':
+                pass
+            else:
+                temp_35 = 'OVER'
+                if tak_35 == temp_35:
+                    lista_tak_35.append('V')
+                else:
+                    lista_tak_35.append('F')
+        else:
+            if tak_35 == 'NO BET':
+                pass
+            else:
+                temp_35 = 'UNDER'
+                if tak_35 == temp_35:
+                    lista_tak_35.append('V')
+                else:
+                    lista_tak_35.append('F')
+
+
+
+
+
+    tam_lista_05 = len(lista_tak_05)
+    total_05 = 0
+    for i in lista_tak_05:
+        if i == 'V':
+            total_05 +=1
+        else: pass
+
+    print("PERCENTAGEM DE ACERTOS 05: " + str((total_05/tam_lista_05)*100))
+
+    tam_lista_15 = len(lista_tak_15)
+    total_15 = 0
+    for i in lista_tak_15:
+        if i == 'V':
+            total_15 += 1
+        else:
+            pass
+    print("PERCENTAGEM DE ACERTOS 15: " + str((total_15 / tam_lista_15) * 100))
+
+    tam_lista_25 = len(lista_tak_25)
+    total_25 = 0
+    for i in lista_tak_25:
+        if i == 'V':
+            total_25 += 1
+        else:
+            pass
+    print("PERCENTAGEM DE ACERTOS 25: " + str((total_25 / tam_lista_25) * 100))
+
+    tam_lista_35 = len(lista_tak_35)
+    total_35 = 0
+    for i in lista_tak_35:
+        if i == 'V':
+            total_35 += 1
+        else:
+            pass
+    print("PERCENTAGEM DE ACERTOS 35: " + str((total_35 / tam_lista_35) * 100))
+
+
+
+
+
+def estatisticas():
+    print("###########################################")
+    print("##                                       ##")
+    print("##               Estatiticas             ##")
+    print("##                                       ##")
+    print("###########################################")
+    leagues = carregaLigas()
+    for i, league in enumerate(leagues):
+        i += 1
+        print(str(i) + " - " + league[1] + " - " + league[2])
+        cont = i
+    print("\n")
+    print("0 - Voltar menu anterior")
+    op = int(input('Opção:'))
+    pais_liga = leagues[op - 1]
+    pais = pais_liga[1]
+    liga = pais_liga[2]
+    calcula_estatistica(pais,liga)
+
+
+
+def menu():
+    print("###########################################")
+    print("##                                       ##")
+    print("##               TAKUKI by JCG           ##")
+    print("##                                       ##")
+    print("###########################################\n\n")
+    print("1 - Ver estatisticas por pais")
+    print("2 - Atualizar takuki")
+    print("0 - Sair")
+
+    op = int(input('Opção:'))
+    if op == 1:
+        estatisticas()
+    elif op == 2:
+        takuki()
+    elif op == 0:
+        return 0
+    else:
+        print("Opção inválida!")
+        return -1
+
+
+
 def main():
     menu()
+
 
 
 

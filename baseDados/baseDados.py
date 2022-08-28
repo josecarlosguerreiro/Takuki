@@ -194,11 +194,21 @@ def getMaxIdForRound(round):
     disconnect(conn)
     return res_id
 
-def nextRound(country):
+def nextRound(country, league):
     conn = connect()
     mycursor = conn.cursor()
-    sql = "SELECT min(round) FROM games where realized = 'N' and pais = '" + country + "'"
+    sql = "SELECT min(round) FROM games where realized = 'N' and pais = '" + country + "' and league= '" + league + "'"
     mycursor.execute(sql)
     round = mycursor.fetchone()
     disconnect(conn)
     return round
+
+def calcula_estatistica(pais,liga):
+    conn = connect()
+    mycursor = conn.cursor()
+    sql = "SELECT * FROM games where realized = 'Y' and pais = '" + pais + "' and league= '" + liga + "' and takuki05 is not null"
+    print("SQL: " + sql)
+    mycursor.execute(sql)
+    cursor = mycursor.fetchall()
+    disconnect(conn)
+    return cursor
