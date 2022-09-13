@@ -1,9 +1,11 @@
 import urllib.request
 from bs4 import BeautifulSoup
+import ssl
 
 row_list = []
 
 def openURL(url):
+    ssl._create_default_https_context = ssl._create_unverified_context
     fp = urllib.request.urlopen(url)
     mybytes = fp.read()
     html = mybytes.decode("utf8")
