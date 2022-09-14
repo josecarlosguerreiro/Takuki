@@ -99,7 +99,7 @@ def updateGame(id, game):
 def getHomeGames(team, round):
     conn = connect()
     mycursor = conn.cursor()
-    sql = "SELECT * FROM games where home_team = '" + team + "' and round <= '" + str(round) + "'"
+    sql = "SELECT * FROM games where home_team = '" + team + "' and round <= '" + str(round) + "' and realized = 'Y'"
     mycursor.execute(sql)
     myresult = mycursor.fetchall()
     disconnect(conn)
@@ -109,7 +109,7 @@ def getHomeGames(team, round):
 def getAwayGames(team, round):
     conn = connect()
     mycursor = conn.cursor()
-    sql = "SELECT * FROM games where away_team = '" + team + "' and round <= '" + str(round) + "'"
+    sql = "SELECT * FROM games where away_team = '" + team + "' and round <= '" + str(round) + "' and realized = 'Y'"
     mycursor.execute(sql)
     myresult = mycursor.fetchall()
     disconnect(conn)

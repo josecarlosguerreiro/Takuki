@@ -26,69 +26,83 @@ def getHomeGames(team, round, homeAway):
     over25_away = 0
     total_goals = 0
 
+
     if homeAway == 'home':
         res = db.getHomeGames(team, round - 1)
-        for game in res:
-            total_games += 1
-            if game[7] > game[8]:
-                total_wins += 1
-                total_points += 3
+        print('RES:' + str(res))
+        if res.__len__() == 0:
+            # SEM JOGOS EM CASA
+            #COVENTRY City - Estadio em obras
+            #Epoca 2022-2023
+            return [None, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        else:
+            for game in res:
+                total_games += 1
+                if game[7] > game[8]:
+                    total_wins += 1
+                    total_points += 3
 
-            elif game[7] == game[8]:
-                total_draws += 1
-                total_points += 1
-            else:
-                total_lose += 1
-            total_goals = total_goals + game[14]
+                elif game[7] == game[8]:
+                    total_draws += 1
+                    total_points += 1
+                else:
+                    total_lose += 1
+                total_goals = total_goals + game[14]
 
-            if game[14] > 0:
-                over05_home += 1
-                if game[14] > 1.5:
-                    over15_home += 1
-                    if game[14] > 2.5:
-                        over25_home += 1
+                if game[14] > 0:
+                    over05_home += 1
+                    if game[14] > 1.5:
+                        over15_home += 1
+                        if game[14] > 2.5:
+                            over25_home += 1
+                        else:
+                            pass
                     else:
                         pass
                 else:
                     pass
-            else:
-                pass
-            scored += int(game[7])
-            against += int(game[8])
-        return [game[0], total_games, total_wins, total_draws, total_lose, scored, against, total_points, over05_home,
-                over15_home, over25_home]
+                scored += int(game[7])
+                against += int(game[8])
+            return [game[0], total_games, total_wins, total_draws, total_lose, scored, against, total_points, over05_home,
+                    over15_home, over25_home]
     else:
         res = db.getAwayGames(team, round - 1)
-        for game in res:
-            total_games += 1
-            if game[8] > game[7]:
-                total_wins += 1
-                total_points += 3
-            elif game[7] == game[8]:
-                total_draws += 1
-                total_points += 1
-            else:
-                total_lose += 1
+        if res.__len__() == 0:
+            '''
+            Sem jogos fora
+            '''
+            return [None, total_games, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        else:
+            for game in res:
+                total_games += 1
+                if game[8] > game[7]:
+                    total_wins += 1
+                    total_points += 3
+                elif game[7] == game[8]:
+                    total_draws += 1
+                    total_points += 1
+                else:
+                    total_lose += 1
 
-            total_goals = game[8] + game[7]
+                total_goals = game[8] + game[7]
 
-            if game[14] > 0:
-                over05_away += 1
-                if game[14] >= 1.5:
-                    over15_away += 1
-                    if game[14] >= 2.5:
-                        over25_away += 1
+                if game[14] > 0:
+                    over05_away += 1
+                    if game[14] >= 1.5:
+                        over15_away += 1
+                        if game[14] >= 2.5:
+                            over25_away += 1
+                        else:
+                            pass
                     else:
                         pass
                 else:
                     pass
-            else:
-                pass
 
-            scored += int(game[8])
-            against += int(game[7])
-        return [game[0], total_games, total_wins, total_draws, total_lose, scored, against, total_points, over05_away,
-                over15_away, over25_away]
+                scored += int(game[8])
+                against += int(game[7])
+            return [game[0], total_games, total_wins, total_draws, total_lose, scored, against, total_points, over05_away,
+                    over15_away, over25_away]
 
 
 def createGames(row_list, league):
@@ -266,17 +280,12 @@ def takuki():
             t1_total_under25 = t1_played - (t1_over25_home + t1_over25_away)
             t1_total_over25 = t1_over25_home + t1_over25_away
 
-            t2_played = home_games_t2 + away_games_t2
-            t2_win = home_wins_t2 + away_wins_t2
-            t2_draw = home_draws_t2 + away_draws_t2
-            t2_loose = home_loose_t2 + away_loose_t2
-            t2_goals_scores = home_scored_t2 + away_scored_t2
-            t2_goals_against = home_against_t2 + away_against_t2
-            t2_diff_goals = t2_goals_scores - t2_goals_against
-            t2_total_under25 = t2_played - (t2_over25_home + t2_over25_away)
-            t2_total_over25 = t2_over25_home + t2_over25_away
-
-            # Takuki calculations
+                        Ver caso do coventry city - sem jogos em casa pq tem o estadio em obras
+                        ZeroDivisionError: division by zero
+                        Adicionar condiçoes de validacao de calculos
+                        '''
+                        # Takuki calculations
+                        '''
 
             t1_temp1 = ((home_scored_t1 / home_games_t1) + (away_against_t2 / away_games_t2)) / 2
             t2_temp1 = ((away_scored_t2 / away_games_t2) + (away_against_t1 / home_games_t1)) / 2
