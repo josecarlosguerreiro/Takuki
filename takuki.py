@@ -220,129 +220,132 @@ def takuki():
                     id_game = db.getGame(game)
                     db.updateGame(id_game[0], game)
                 else:
-                    #calcular proxima jornada
-                    id_game = db.getGame(game)
-                    if int(game.getRound()) == nextRound:
-                        print("CALCULAR JORNADA: " + str(game.getRound()) + "jogo: " + str(
-                            game.getHomeTeam()) + " - " + str(game.getAwayTeam()))
-                        # home team games - team 1 home games
-                        [game_id_t1, home_games_t1, home_wins_t1, home_draws_t1, home_loose_t1, home_scored_t1,
-                         home_against_t1,
-                         home_points_t1, t1_over05_home, t1_over15_home, t1_over25_home] = getHomeGames(game.getHomeTeam(),
-                                                                                                        int(game.getRound()),
-                                                                                                        'home')
-                        # home team games - team 1 away games
-                        [game_id_t1, away_games_t1, away_wins_t1, away_draws_t1, away_loose_t1, away_scored_t1,
-                         away_against_t1,
-                         away_points_t1, t1_over05_away, t1_over15_away, t1_over25_away] = getHomeGames(game.getHomeTeam(),
-                                                                                                        int(game.getRound()),
-                                                                                                        'away')
-                        # away team games - team 2 home games
-                        [game_id_t2, home_games_t2, home_wins_t2, home_draws_t2, home_loose_t2, home_scored_t2,
-                         home_against_t2,
-                         home_points_t2, t2_over05_home, t2_over15_home, t2_over25_home] = getHomeGames(game.getAwayTeam(),
-                                                                                                        int(game.getRound()),
-                                                                                                        'home')
+                    pass
 
-                        # away team games - team 2 away games
-                        [game_id_t1, away_games_t2, away_wins_t2, away_draws_t2, away_loose_t2, away_scored_t2,
-                         away_against_t2,
-                         away_points_t2, t2_over05_away, t2_over15_away, t2_over25_away] = getHomeGames(game.getAwayTeam(),
-                                                                                                        int(game.getRound()),
-                                                                                                        'away')
+    for game in gameList:
+        #calcular proxima jornada
+        id_game = db.getGame(game)
+        if int(game.getRound()) == nextRound:
+            print("CALCULAR JORNADA: " + str(game.getRound()) + "jogo: " + str(
+                game.getHomeTeam()) + " - " + str(game.getAwayTeam()))
+            # home team games - team 1 home games
+            [game_id_t1, home_games_t1, home_wins_t1, home_draws_t1, home_loose_t1, home_scored_t1,
+             home_against_t1,
+             home_points_t1, t1_over05_home, t1_over15_home, t1_over25_home] = getHomeGames(game.getHomeTeam(),
+                                                                                            int(game.getRound()),
+                                                                                            'home')
+            # home team games - team 1 away games
+            [game_id_t1, away_games_t1, away_wins_t1, away_draws_t1, away_loose_t1, away_scored_t1,
+             away_against_t1,
+             away_points_t1, t1_over05_away, t1_over15_away, t1_over25_away] = getHomeGames(game.getHomeTeam(),
+                                                                                            int(game.getRound()),
+                                                                                            'away')
+            # away team games - team 2 home games
+            [game_id_t2, home_games_t2, home_wins_t2, home_draws_t2, home_loose_t2, home_scored_t2,
+             home_against_t2,
+             home_points_t2, t2_over05_home, t2_over15_home, t2_over25_home] = getHomeGames(game.getAwayTeam(),
+                                                                                            int(game.getRound()),
+                                                                                            'home')
 
-                        # home teams - team 1 - OVERALL - total games, goals, victories, etc
+            # away team games - team 2 away games
+            [game_id_t1, away_games_t2, away_wins_t2, away_draws_t2, away_loose_t2, away_scored_t2,
+             away_against_t2,
+             away_points_t2, t2_over05_away, t2_over15_away, t2_over25_away] = getHomeGames(game.getAwayTeam(),
+                                                                                            int(game.getRound()),
+                                                                                            'away')
 
-                        t1_played = home_games_t1 + away_games_t1
-                        t1_win = home_wins_t1 + away_wins_t1
-                        t1_draw = home_draws_t1 + away_draws_t1
-                        t1_loose = home_loose_t1 + away_loose_t1
-                        t1_goals_scores = home_scored_t1 + away_scored_t1
-                        t1_goals_against = home_against_t1 + away_against_t1
-                        t1_diff_goals = t1_goals_scores - t1_goals_against
-                        t1_total_under25 = t1_played - (t1_over25_home + t1_over25_away)
-                        t1_total_over25 = t1_over25_home + t1_over25_away
+            # home teams - team 1 - OVERALL - total games, goals, victories, etc
 
-                        t2_played = home_games_t2 + away_games_t2
-                        t2_win = home_wins_t2 + away_wins_t2
-                        t2_draw = home_draws_t2 + away_draws_t2
-                        t2_loose = home_loose_t2 + away_loose_t2
-                        t2_goals_scores = home_scored_t2 + away_scored_t2
-                        t2_goals_against = home_against_t2 + away_against_t2
-                        t2_diff_goals = t2_goals_scores - t2_goals_against
-                        t2_total_under25 = t2_played - (t2_over25_home + t2_over25_away)
-                        t2_total_over25 = t2_over25_home + t2_over25_away
+            t1_played = home_games_t1 + away_games_t1
+            t1_win = home_wins_t1 + away_wins_t1
+            t1_draw = home_draws_t1 + away_draws_t1
+            t1_loose = home_loose_t1 + away_loose_t1
+            t1_goals_scores = home_scored_t1 + away_scored_t1
+            t1_goals_against = home_against_t1 + away_against_t1
+            t1_diff_goals = t1_goals_scores - t1_goals_against
+            t1_total_under25 = t1_played - (t1_over25_home + t1_over25_away)
+            t1_total_over25 = t1_over25_home + t1_over25_away
 
-                        # Takuki calculations
+            t2_played = home_games_t2 + away_games_t2
+            t2_win = home_wins_t2 + away_wins_t2
+            t2_draw = home_draws_t2 + away_draws_t2
+            t2_loose = home_loose_t2 + away_loose_t2
+            t2_goals_scores = home_scored_t2 + away_scored_t2
+            t2_goals_against = home_against_t2 + away_against_t2
+            t2_diff_goals = t2_goals_scores - t2_goals_against
+            t2_total_under25 = t2_played - (t2_over25_home + t2_over25_away)
+            t2_total_over25 = t2_over25_home + t2_over25_away
 
-                        t1_temp1 = ((home_scored_t1 / home_games_t1) + (away_against_t2 / away_games_t2)) / 2
-                        t2_temp1 = ((away_scored_t2 / away_games_t2) + (away_against_t1 / home_games_t1)) / 2
+            # Takuki calculations
 
-                        t1_temp2 = ((t1_goals_scores / t1_played) + (t2_goals_against / t2_played)) / 2
-                        t2_temp2 = ((t2_goals_scores / t2_played) + (t1_goals_against / t1_played)) / 2
+            t1_temp1 = ((home_scored_t1 / home_games_t1) + (away_against_t2 / away_games_t2)) / 2
+            t2_temp1 = ((away_scored_t2 / away_games_t2) + (away_against_t1 / home_games_t1)) / 2
 
-                        t1_res = (t1_temp1 * 0.7) + (t1_temp2 * 0.3)
-                        t2_res = (t2_temp1 * 0.7) + (t2_temp2 * 0.3)
+            t1_temp2 = ((t1_goals_scores / t1_played) + (t2_goals_against / t2_played)) / 2
+            t2_temp2 = ((t2_goals_scores / t2_played) + (t1_goals_against / t1_played)) / 2
 
-                        t1_over = ((home_games_t1 - t1_over25_home) / home_games_t1) + (
-                                (away_games_t2 - t2_over25_away) / away_games_t2)
-                        t2_over = (t1_over25_home / home_games_t1) + (t2_over25_away / away_games_t2)
+            t1_res = (t1_temp1 * 0.7) + (t1_temp2 * 0.3)
+            t2_res = (t2_temp1 * 0.7) + (t2_temp2 * 0.3)
 
-                        t1_over_total = (t1_total_under25 / t1_played) + (t2_total_under25 / t2_played)
-                        t2_over_total = (t1_total_over25 / t1_played) + (t2_total_over25 / t2_played)
+            t1_over = ((home_games_t1 - t1_over25_home) / home_games_t1) + (
+                    (away_games_t2 - t2_over25_away) / away_games_t2)
+            t2_over = (t1_over25_home / home_games_t1) + (t2_over25_away / away_games_t2)
 
-                        t1_under = ((t1_over * 0.7) + (t1_over_total * 0.3)) / 2
-                        t2_under = ((t2_over * 0.7) + (t2_over_total * 0.3)) / 2
+            t1_over_total = (t1_total_under25 / t1_played) + (t2_total_under25 / t2_played)
+            t2_over_total = (t1_total_over25 / t1_played) + (t2_total_over25 / t2_played)
 
-                        t1_t2_res = t1_res + t2_res
-                        t1_t2_under = t1_under - t2_under
+            t1_under = ((t1_over * 0.7) + (t1_over_total * 0.3)) / 2
+            t2_under = ((t2_over * 0.7) + (t2_over_total * 0.3)) / 2
 
-                        # t1_total = t1_t2_res * t1_t2_under
-                        alpha_coeficient = 1 - t1_t2_under
-                        total = t1_t2_res * alpha_coeficient
+            t1_t2_res = t1_res + t2_res
+            t1_t2_under = t1_under - t2_under
+
+            # t1_total = t1_t2_res * t1_t2_under
+            alpha_coeficient = 1 - t1_t2_under
+            total = t1_t2_res * alpha_coeficient
 
 
-                        if total < 0:
-                            tip_over05 = "UNDER"
-                        else:
-                            if 0 < total < 1:
-                                tip_over05 = "NO BET"
-                            if total > 1:
-                                tip_over05 = "OVER"
+            if total < 0:
+                tip_over05 = "UNDER"
+            else:
+                if 0 < total < 1:
+                    tip_over05 = "NO BET"
+                if total > 1:
+                    tip_over05 = "OVER"
 
-                        # calculations for overs - Over1.5
+            # calculations for overs - Over1.5
 
-                        if total < 1:
-                            tip_over15 = "UNDER"
-                        else:
-                            if 1 < total < 2:
-                                tip_over15 = "NO BET"
-                            if total > 2:
-                                tip_over15 = "OVER"
+            if total < 1:
+                tip_over15 = "UNDER"
+            else:
+                if 1 < total < 2:
+                    tip_over15 = "NO BET"
+                if total > 2:
+                    tip_over15 = "OVER"
 
-                        # calculations for overs - Over2.5
+            # calculations for overs - Over2.5
 
-                        if total < 2:
-                            tip_over25 = "UNDER"
-                        else:
-                            if 2 < total < 3:
-                                tip_over25 = "NO BET"
-                            if total > 3:
-                                tip_over25 = "OVER"
+            if total < 2:
+                tip_over25 = "UNDER"
+            else:
+                if 2 < total < 3:
+                    tip_over25 = "NO BET"
+                if total > 3:
+                    tip_over25 = "OVER"
 
-                        # calculations for overs - Over3.5
+            # calculations for overs - Over3.5
 
-                        if total < 3:
-                            tip_over35 = "UNDER"
-                        else:
-                            if 3 < total < 4:
-                                tip_over35 = "NO BET"
-                            if total > 4:
-                                tip_over35 = "OVER"
-                        #print("updateTakuki:" + str(id_game[0]) + " | " + str(tip_over15) + " | " + str(tip_over25) + " | " + str(tip_over35) + " | " + str(total))
-                        db.updateTakuki(id_game[0], tip_over05, tip_over15, tip_over25, tip_over35, total)
-                    else:
-                        pass
+            if total < 3:
+                tip_over35 = "UNDER"
+            else:
+                if 3 < total < 4:
+                    tip_over35 = "NO BET"
+                if total > 4:
+                    tip_over35 = "OVER"
+            #print("updateTakuki:" + str(id_game[0]) + " | " + str(tip_over15) + " | " + str(tip_over25) + " | " + str(tip_over35) + " | " + str(total))
+            db.updateTakuki(id_game[0], tip_over05, tip_over15, tip_over25, tip_over35, total)
+        else:
+            pass
     return
 
 def calcula_estatistica(pais,liga):
