@@ -279,13 +279,13 @@ def takuki():
             t1_diff_goals = t1_goals_scores - t1_goals_against
             t1_total_under25 = t1_played - (t1_over25_home + t1_over25_away)
             t1_total_over25 = t1_over25_home + t1_over25_away
-
+            '''
                         Ver caso do coventry city - sem jogos em casa pq tem o estadio em obras
                         ZeroDivisionError: division by zero
                         Adicionar condiçoes de validacao de calculos
-                        '''
+            
                         # Takuki calculations
-                        '''
+            '''
 
             t1_temp1 = ((home_scored_t1 / home_games_t1) + (away_against_t2 / away_games_t2)) / 2
             t2_temp1 = ((away_scored_t2 / away_games_t2) + (away_against_t1 / home_games_t1)) / 2
