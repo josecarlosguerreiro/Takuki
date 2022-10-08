@@ -29,64 +29,70 @@ def getHomeGames(team, round, homeAway):
     if homeAway == 'home':
         res = db.getHomeGames(team, round - 1)
         for game in res:
-            total_games += 1
-            if game[7] > game[8]:
-                total_wins += 1
-                total_points += 3
-
-            elif game[7] == game[8]:
-                total_draws += 1
-                total_points += 1
+            if game[9] == 'A':
+                pass
             else:
-                total_lose += 1
-            total_goals = total_goals + game[14]
+                total_games += 1
+                if game[7] > game[8]:
+                    total_wins += 1
+                    total_points += 3
 
-            if game[14] > 0:
-                over05_home += 1
-                if game[14] > 1.5:
-                    over15_home += 1
-                    if game[14] > 2.5:
-                        over25_home += 1
+                elif game[7] == game[8]:
+                    total_draws += 1
+                    total_points += 1
+                else:
+                    total_lose += 1
+                total_goals = total_goals + game[14]
+
+                if game[14] > 0:
+                    over05_home += 1
+                    if game[14] > 1.5:
+                        over15_home += 1
+                        if game[14] > 2.5:
+                            over25_home += 1
+                        else:
+                            pass
                     else:
                         pass
                 else:
                     pass
-            else:
-                pass
-            scored += int(game[7])
-            against += int(game[8])
+                scored += int(game[7])
+                against += int(game[8])
         return [game[0], total_games, total_wins, total_draws, total_lose, scored, against, total_points, over05_home,
                 over15_home, over25_home]
     else:
         res = db.getAwayGames(team, round - 1)
         for game in res:
-            total_games += 1
-            if game[8] > game[7]:
-                total_wins += 1
-                total_points += 3
-            elif game[7] == game[8]:
-                total_draws += 1
-                total_points += 1
+            if game[9] == 'A':
+                pass
             else:
-                total_lose += 1
+                total_games += 1
+                if game[8] > game[7]:
+                    total_wins += 1
+                    total_points += 3
+                elif game[7] == game[8]:
+                    total_draws += 1
+                    total_points += 1
+                else:
+                    total_lose += 1
 
-            total_goals = game[8] + game[7]
+                total_goals = game[8] + game[7]
 
-            if game[14] > 0:
-                over05_away += 1
-                if game[14] >= 1.5:
-                    over15_away += 1
-                    if game[14] >= 2.5:
-                        over25_away += 1
+                if game[14] > 0:
+                    over05_away += 1
+                    if game[14] >= 1.5:
+                        over15_away += 1
+                        if game[14] >= 2.5:
+                            over25_away += 1
+                        else:
+                            pass
                     else:
                         pass
                 else:
                     pass
-            else:
-                pass
 
-            scored += int(game[8])
-            against += int(game[7])
+                scored += int(game[8])
+                against += int(game[7])
         return [game[0], total_games, total_wins, total_draws, total_lose, scored, against, total_points, over05_away,
                 over15_away, over25_away]
 
@@ -204,8 +210,7 @@ def takuki():
             db.addGame(country, game)
         else:
             pass
-    nextRound = db.nextRound(country, league)[0]
-    print("PROXIMA JORNADA: " + str(nextRound))
+    print("A ATUALIZAR RESULTADOS...")
     for game in gameList:
         if game.getRealized() == 'A':
             pass
@@ -221,12 +226,15 @@ def takuki():
                     db.updateGame(id_game[0], game)
                 else:
                     pass
-
+#antes de entrar aqui, tem que ir ler os jogos da base dados pq os jogos que estão na gameList ja estao desatualizados
+# pq ja atualizou os jogos deste fds.
+    nextRound = db.nextRound(country, league)[0]
+    print("PROXIMA JORNADA: " + str(nextRound))
     for game in gameList:
         #calcular proxima jornada
         id_game = db.getGame(game)
         if int(game.getRound()) == nextRound:
-            print("CALCULAR JORNADA: " + str(game.getRound()) + "jogo: " + str(
+            print("CALCULAR JORNADA: " + str(game.getRound()) + "\njogo: " + str(
                 game.getHomeTeam()) + " - " + str(game.getAwayTeam()))
             # home team games - team 1 home games
             [game_id_t1, home_games_t1, home_wins_t1, home_draws_t1, home_loose_t1, home_scored_t1,
