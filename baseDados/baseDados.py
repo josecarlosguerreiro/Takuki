@@ -138,7 +138,7 @@ def updateTotalGoals(homeTeam, awayTeam, round, goals):
     disconnect(conn)
 
 
-def updateTakuki(game_id, over05, over15, over25, over35, total):
+def updateTakuki(game_id, over05, over15, over25, over35, total, golos_m_eq_casa, golos_m_eq_fora):
     conn = connect()
     mycursor = conn.cursor()
     print("##########################################")
@@ -147,8 +147,11 @@ def updateTakuki(game_id, over05, over15, over25, over35, total):
     print("takuki15: " + over15)
     print("takuki25: " + over25)
     print("takuki35: " + over35)
+    print("golos_m_eq_casa: " + str(golos_m_eq_casa))
+    print("golos_m_eq_fora: " + str(golos_m_eq_fora))
     sql = "update games set takuki05 = '" + str(over05) + "', takuki15 = '" + str(over15) + "', takuki25 = '" + str(
-        over25) + "', takuki35 = '" + str(over35) + "', takuki_total = '" + str(total) + "' where id = '" + str(game_id) + "'"
+        over25) + "', takuki35 = '" + str(over35) + "', takuki_total = '" + str(total) + \
+          "', golos_prev_casa = '" + str(golos_m_eq_casa) + "', golos_prev_fora = '" + str(golos_m_eq_fora) + "' where id = '" + str(game_id) + "'"
     print("QUERY: " + sql)
     mycursor.execute(sql)
     conn.commit()

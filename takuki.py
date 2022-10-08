@@ -351,7 +351,7 @@ def takuki():
                 if total > 4:
                     tip_over35 = "OVER"
             #print("updateTakuki:" + str(id_game[0]) + " | " + str(tip_over15) + " | " + str(tip_over25) + " | " + str(tip_over35) + " | " + str(total))
-            db.updateTakuki(id_game[0], tip_over05, tip_over15, tip_over25, tip_over35, total)
+            db.updateTakuki(id_game[0], tip_over05, tip_over15, tip_over25, tip_over35, total, home_scored_t1/home_games_t1, away_scored_t2/away_games_t2)
         else:
             pass
     return
