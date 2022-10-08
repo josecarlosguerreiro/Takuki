@@ -1,10 +1,13 @@
 import urllib.request
 from bs4 import BeautifulSoup
 import ssl
+import takuki as takuki
 
 row_list = []
 
 def openURL(url):
+    #takuki.resetList(row_list)
+    row_list = []
     ssl._create_default_https_context = ssl._create_unverified_context
     fp = urllib.request.urlopen(url)
     mybytes = fp.read()

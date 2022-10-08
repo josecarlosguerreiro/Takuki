@@ -1,6 +1,6 @@
 import mysql.connector
 
-'''
+
 def connect():
     try:
         mydb = mysql.connector.connect(user='root', password='2111986kramermania',
@@ -22,7 +22,7 @@ def connect():
     except:
         print("Erro ao aceder base dados.")
         return None
-
+'''
 
 def disconnect(connection):
     try:
@@ -138,21 +138,19 @@ def updateTotalGoals(homeTeam, awayTeam, round, goals):
     disconnect(conn)
 
 
-def updateTakuki(game_id, over05, over15, over25, over35, total, golos_m_eq_casa, golos_m_eq_fora):
+def updateTakuki(game_id, dta_jogo, over05, over15, over25, over35, total, golos_m_eq_casa, golos_m_eq_fora):
     conn = connect()
     mycursor = conn.cursor()
-    print("##########################################")
     print("ID: " + str(game_id))
+    print("Dta_Jogo: " + dta_jogo)
     print("takuki05: " + over05)
     print("takuki15: " + over15)
     print("takuki25: " + over25)
     print("takuki35: " + over35)
-    print("golos_m_eq_casa: " + str(golos_m_eq_casa))
-    print("golos_m_eq_fora: " + str(golos_m_eq_fora))
-    sql = "update games set takuki05 = '" + str(over05) + "', takuki15 = '" + str(over15) + "', takuki25 = '" + str(
+    sql = "update games set game_date = '" + str(dta_jogo) + "', takuki05 = '" + str(over05) + "', takuki15 = '" + str(over15) + "', takuki25 = '" + str(
         over25) + "', takuki35 = '" + str(over35) + "', takuki_total = '" + str(total) + \
           "', golos_prev_casa = '" + str(golos_m_eq_casa) + "', golos_prev_fora = '" + str(golos_m_eq_fora) + "' where id = '" + str(game_id) + "'"
-    print("QUERY: " + sql)
+    print("##########################################")
     mycursor.execute(sql)
     conn.commit()
     disconnect(conn)
@@ -201,6 +199,7 @@ def nextRound(country, league):
     conn = connect()
     mycursor = conn.cursor()
     sql = "SELECT min(round) FROM games where realized = 'N' and pais = '" + country + "' and league= '" + league + "'"
+    print("SQL: " + sql)
     mycursor.execute(sql)
     round = mycursor.fetchone()
     disconnect(conn)
