@@ -7,7 +7,6 @@ import datetime
 # dd/mm/YY
 #dta_today = date.today().strftime("%d.%m.%Y")
 dta_today = datetime.date.today().strftime("%Y-%m-%d")
-gameList = []
 
 
 def getHomeGames(team, round, homeAway):
@@ -98,6 +97,7 @@ def getHomeGames(team, round, homeAway):
 
 
 def createGames(row_list, league):
+    gameList = []
     total_goals = ' '
     for item in row_list:
         for td in item:
@@ -158,7 +158,7 @@ def createGames(row_list, league):
                 else:
                     pass
                 '''
-    return 0
+    return gameList
 
 
 def carregaLigas():
@@ -166,9 +166,8 @@ def carregaLigas():
     return ligas
 
 
-def takuki():
+def takuki_menu():
     cont = 0
-
     print("###########################################")
     print("##                                       ##")
     print("##               TAKUKI by JCG           ##")
@@ -181,36 +180,54 @@ def takuki():
         cont = i
     print("0 - Exit")
 
-    int_league = int(input('Witch league do you want? '))
-    print("You chosed " + str(int_league))
-
+    int_league = int(input('Opção: '))
+    print("Escolheste: " + str(int_league))
     if int_league <= cont:
         if int_league == 0:
             return 0
         else:
-            country_league = leagues[int_league - 1]
-            country = country_league[1]
-            league = country_league[2]
-            year = country_league[3]
-            link = country_league[4]
-            active = country_league[5]
-            row_list = online.openURL(link)
-            createGames(row_list, league)
+            print("ARRAY: " + str(leagues))
+            return leagues[int_league - 1]
     else:
-        print("Invalid option. Please select a correct one")
+        print("Opção inválida. Pf escolhe uma opção correta")
         return -1
 
-    country_league = leagues[int_league - 1]
+
+def criarJogos(leagues):
+
+    country_league = leagues
     country = country_league[1]
+    league = country_league[2]
+    year = country_league[3]
+    link = country_league[4]
+    active = country_league[5]
+    row_list = online.openURL(link)
+    gameList = createGames(row_list, league)
+    return gameList
 
+def takuki():
 
+    league = takuki_menu()
+    print("LEAGUE:::::: " + str(league))
+
+    gameList = criarJogos(league)
+    country_league = league[2]
+    country = league[1]
+    adicionarJogos(gameList)
+    print("A ATUALIZAR RESULTADOS...")
+    atualizaJogos(gameList)
+    print("A CALCULAR TAKUKI...")
+    calculaTakuki(gameList, country, country_league)
+
+def adicionarJogos(gameList):
     for game in gameList:
         res = db.getGame(game)
         if res is None:
             db.addGame(country, game)
         else:
             pass
-    print("A ATUALIZAR RESULTADOS...")
+
+def atualizaJogos(gameList):
     for game in gameList:
         if game.getRealized() == 'A':
             pass
@@ -226,6 +243,9 @@ def takuki():
                     db.updateGame(id_game[0], game)
                 else:
                     pass
+    return 0
+
+def calculaTakuki(gameList, country, league):
 #antes de entrar aqui, tem que ir ler os jogos da base dados pq os jogos que estão na gameList ja estao desatualizados
 # pq ja atualizou os jogos deste fds.
     nextRound = db.nextRound(country, league)[0]
@@ -234,8 +254,7 @@ def takuki():
         #calcular proxima jornada
         id_game = db.getGame(game)
         if int(game.getRound()) == nextRound:
-            print("CALCULAR JORNADA: " + str(game.getRound()) + "\njogo: " + str(
-                game.getHomeTeam()) + " - " + str(game.getAwayTeam()))
+            print("JOGO: " + str(game.getHomeTeam()) + " - " + str(game.getAwayTeam()))
             # home team games - team 1 home games
             [game_id_t1, home_games_t1, home_wins_t1, home_draws_t1, home_loose_t1, home_scored_t1,
              home_against_t1,
@@ -351,10 +370,34 @@ def takuki():
                 if total > 4:
                     tip_over35 = "OVER"
             #print("updateTakuki:" + str(id_game[0]) + " | " + str(tip_over15) + " | " + str(tip_over25) + " | " + str(tip_over35) + " | " + str(total))
-            db.updateTakuki(id_game[0], tip_over05, tip_over15, tip_over25, tip_over35, total, home_scored_t1/home_games_t1, away_scored_t2/away_games_t2)
+            db.updateTakuki(id_game[0], game.getData(), tip_over05, tip_over15, tip_over25, tip_over35, total, home_scored_t1/home_games_t1, away_scored_t2/away_games_t2)
         else:
             pass
     return
+
+
+def resetList(list):
+    list = []
+    return list
+
+def takuki_global():
+    array_ligas = carregaLigas()
+    cont = len(array_ligas)
+
+    for i in range(cont):
+        elem_array = array_ligas[i]
+        pais = elem_array[1]
+        liga = elem_array[2]
+        link = elem_array[4]
+        row_list = online.openURL(link)
+        gameList = createGames(row_list, liga)
+        print("ATUALIZAR JOGO...")
+        atualizaJogos(gameList)
+        print("CALCULAR TAKUKI: " + str(gameList))
+        calculaTakuki(gameList, pais, liga)
+        gameList = resetList(gameList)
+        row_list = resetList(row_list)
+    return menu()
 
 def calcula_estatistica(pais,liga):
     cursor = db.calcula_estatistica(pais,liga)
@@ -523,6 +566,7 @@ def menu():
     print("###########################################\n\n")
     print("1 - Ver estatisticas por pais")
     print("2 - Atualizar takuki")
+    print("9 - Atualizar takuki de forma global")
     print("0 - Sair")
 
     op = int(input('Opção:'))
@@ -530,6 +574,8 @@ def menu():
         estatisticas()
     elif op == 2:
         takuki()
+    elif op == 9:
+        takuki_global()
     elif op == 0:
         return 0
     else:
