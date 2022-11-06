@@ -5,9 +5,12 @@ import takuki as takuki
 
 row_list = []
 
-def openURL(url):
-    #takuki.resetList(row_list)
-    row_list = []
+def openURL(url, contador):
+    if contador == 0:
+        row_list = []
+    else:
+        pass
+
     ssl._create_default_https_context = ssl._create_unverified_context
     fp = urllib.request.urlopen(url)
     mybytes = fp.read()
@@ -24,7 +27,10 @@ def openURL(url):
         contador = html.count('{page}')
         for i in range(2, html.count('{page}') + 1):
            url = url + '/page/' + str(i)
-           abreURLCompleto(url)
+           #print("abrir pagina 2")
+           #print("url --> " + url)
+           table_rows_2 = abreURLCompleto(url)
+           row_list.append(table_rows_2)
     return row_list
 
 def abreURLCompleto(url):
@@ -35,4 +41,4 @@ def abreURLCompleto(url):
     soup = BeautifulSoup(html, 'html.parser')
     tables = soup.find_all('table')
     table_rows = tables[0].find_all('tr')
-    row_list.append(table_rows)
+    return table_rows

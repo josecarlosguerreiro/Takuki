@@ -1,6 +1,6 @@
 import mysql.connector
 
-
+'''
 def connect():
     try:
         mydb = mysql.connector.connect(user='root', password='2111986kramermania',
@@ -22,7 +22,7 @@ def connect():
     except:
         print("Erro ao aceder base dados.")
         return None
-'''
+
 
 def disconnect(connection):
     try:
@@ -51,7 +51,6 @@ def addGame(pais, game):
     sql = "insert into games (pais, league, season, game_date, round, home_team, away_team, realized) values " \
           "('" + pais + "', '" + game.getLeague() + "', '" + game.getSeason() + "', '" + game.getData() +"', '"\
     + str(game.getRound()) + "', '" + game.getHomeTeam() + "', '" + game.getAwayTeam() +"', '" + game.getRealized() + "')"
-    print("SQL: " + sql)
     mycursor.execute(sql)
 
     conn.commit()
@@ -86,10 +85,13 @@ def getGame(game):
 def updateGame(id, game):
     conn = connect()
     mycursor = conn.cursor()
-    sql = "UPDATE games SET goals_home = '" + str(game.getHomeGoals()) + "', goals_away = '" + str(game.getAwayGoals())\
-          + "', realized = '" + game.getRealized() + "', total_goals = '" + str(game.getTotalGoals()) +\
-          "' WHERE id = '" + str(id) + "'"
-
+    if game.getRealized() == 'A':
+        sql = "UPDATE games SET realized = 'A', game_date = '" + str(game.getData()) + "'WHERE id = '" + str(id) + "'"
+    else:
+        sql = "UPDATE games SET goals_home = '" + str(game.getHomeGoals()) + "', goals_away = '" + str(game.getAwayGoals())\
+              + "', realized = '" + game.getRealized() + "', total_goals = '" + str(game.getTotalGoals()) +\
+              "' ,game_date = '" + str(game.getData()) + "' WHERE id = '" + str(id) + "'"
+    print(sql)
     mycursor.execute(sql)
     conn.commit()
     disconnect(conn)
@@ -99,7 +101,7 @@ def updateGame(id, game):
 def getHomeGames(team, round):
     conn = connect()
     mycursor = conn.cursor()
-    sql = "SELECT * FROM games where home_team = '" + team + "' and round <= '" + str(round) + "'"
+    sql = "SELECT * FROM games where home_team = '" + team + "' and round <= '" + str(round) + "' and realized = 'Y'"
     mycursor.execute(sql)
     myresult = mycursor.fetchall()
     disconnect(conn)
@@ -109,7 +111,7 @@ def getHomeGames(team, round):
 def getAwayGames(team, round):
     conn = connect()
     mycursor = conn.cursor()
-    sql = "SELECT * FROM games where away_team = '" + team + "' and round <= '" + str(round) + "'"
+    sql = "SELECT * FROM games where away_team = '" + team + "' and round <= '" + str(round) + "' and realized = 'Y'"
     mycursor.execute(sql)
     myresult = mycursor.fetchall()
     disconnect(conn)
@@ -126,7 +128,7 @@ def getAllTeamGames(team, round):
     disconnect(conn)
     return myresult
 
-
+'''
 def updateTotalGoals(homeTeam, awayTeam, round, goals):
     conn = connect()
     mycursor = conn.cursor()
@@ -136,17 +138,19 @@ def updateTotalGoals(homeTeam, awayTeam, round, goals):
     mycursor.execute(sql)
     conn.commit()
     disconnect(conn)
-
+'''
 
 def updateTakuki(game_id, dta_jogo, over05, over15, over25, over35, total, golos_m_eq_casa, golos_m_eq_fora):
     conn = connect()
     mycursor = conn.cursor()
+
     print("ID: " + str(game_id))
     print("Dta_Jogo: " + dta_jogo)
     print("takuki05: " + over05)
     print("takuki15: " + over15)
     print("takuki25: " + over25)
     print("takuki35: " + over35)
+
     sql = "update games set game_date = '" + str(dta_jogo) + "', takuki05 = '" + str(over05) + "', takuki15 = '" + str(over15) + "', takuki25 = '" + str(
         over25) + "', takuki35 = '" + str(over35) + "', takuki_total = '" + str(total) + \
           "', golos_prev_casa = '" + str(golos_m_eq_casa) + "', golos_prev_fora = '" + str(golos_m_eq_fora) + "' where id = '" + str(game_id) + "'"
@@ -214,3 +218,11 @@ def calcula_estatistica(pais,liga):
     cursor = mycursor.fetchall()
     disconnect(conn)
     return cursor
+
+def updateDataJogo(id, data_jogo):
+    conn = connect()
+    mycursor = conn.cursor()
+    sql = "Update games set game_date = ' " + str(data_jogo) + "where id = '" + id + "'"
+    mycursor.execute(sql)
+    conn.commit()
+    disconnect(conn)

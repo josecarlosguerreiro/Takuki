@@ -124,6 +124,7 @@ def createGames(row_list, league):
                 team_away = obj.getTeam(team_away_row)
                 res = rows[3]
                 resultado = obj.getResultado(res)
+
                 if resultado.__contains__('vs'):
                     home_goals = ' '
                     away_goals = ' '
@@ -137,27 +138,24 @@ def createGames(row_list, league):
                 #dy1, dm1, dd1 = [int(x) for x in dta_today.split('-')]
                 #dt_game = date(dy, dm, dd)
                 #dt_today = date(dy1, dm1, dd1)
-                if (dta_today > date_game) and resultado.__contains__('vs'):
-                    realized = 'A'
-                elif dta_today > date_game:
-                    realized = 'Y'
+
+                if (dta_today > date_game):
+                    #and resultado.__contains__('vs'):
+                    if resultado.__contains__('-'):
+                        realized = 'Y'
+                    else:
+                        realized = 'A'
+                #elif dta_today > date_game:
+                #    realized = 'A'
                 else:
                     realized = 'N'
+                #print("Realizado: " + realized + " - JORNADA: " + round + " - Equipa Casa: " + home_team + " - Equipa Fora: " + team_away)
+
 
                 game = obj.obj_game(league, season, date_game, round, home_team, team_away, home_goals, away_goals,
                                     realized, total_goals)
                 gameList.append(game)
-                '''
-                res = db.getGame(game)
-                if res is None:  # game does not exists
-                    db.addGame(game)
-                elif res[9] == 'N' and realized == 'Y':  # update game with goals and realized set to Y
-                    upd_game = obj.obj_game.obj_game(league, season, date_game, round, home_team, team_away, home_goals,
-                                            away_goals, realized, total_goals)
-                    db.updateGame(res[0], upd_game)
-                else:
-                    pass
-                '''
+
     return gameList
 
 
@@ -186,7 +184,6 @@ def takuki_menu():
         if int_league == 0:
             return 0
         else:
-            print("ARRAY: " + str(leagues))
             return leagues[int_league - 1]
     else:
         print("Opção inválida. Pf escolhe uma opção correta")
@@ -201,36 +198,41 @@ def criarJogos(leagues):
     year = country_league[3]
     link = country_league[4]
     active = country_league[5]
-    row_list = online.openURL(link)
+    row_list = online.openURL(link,0)
     gameList = createGames(row_list, league)
     return gameList
 
 def takuki():
 
     league = takuki_menu()
-    print("LEAGUE:::::: " + str(league))
 
     gameList = criarJogos(league)
     country_league = league[2]
     country = league[1]
-    adicionarJogos(gameList)
-    print("A ATUALIZAR RESULTADOS...")
+    adicionarJogos(country, gameList)
+    print(country + " - A ATUALIZAR RESULTADOS...")
     atualizaJogos(gameList)
     print("A CALCULAR TAKUKI...")
     calculaTakuki(gameList, country, country_league)
 
-def adicionarJogos(gameList):
+def adicionarJogos(country, gameList):
     for game in gameList:
         res = db.getGame(game)
         if res is None:
             db.addGame(country, game)
         else:
+            if str(game.getData()) != str(res[3]):
+                #print("DATA DIFERENTE " + str(res[0]) + " new date: " + game.getData() + " old date: " + str(res[3]))
+                id_jogo = res[0]
+                db.updateDataJogo(id_jogo, str(game.getData()))
             pass
 
 def atualizaJogos(gameList):
     for game in gameList:
+        #print("REALIZADO: " + game.getRealized() + " JORNADA: " + str(game.getRound()) + " data: " + game.getData() + " game: " + str(game.getHomeTeam()) + " - " + str(game.getAwayTeam()) )
         if game.getRealized() == 'A':
-            pass
+            id_game = db.getGame(game)
+            db.updateGame(id_game[0], game)
         else:
             if int(game.getRound()) <= 5:
                 if dta_today > game.getData():
@@ -249,7 +251,7 @@ def calculaTakuki(gameList, country, league):
 #antes de entrar aqui, tem que ir ler os jogos da base dados pq os jogos que estão na gameList ja estao desatualizados
 # pq ja atualizou os jogos deste fds.
     nextRound = db.nextRound(country, league)[0]
-    print("PROXIMA JORNADA: " + str(nextRound))
+    #print("PROXIMA JORNADA: " + str(nextRound))
     for game in gameList:
         #calcular proxima jornada
         id_game = db.getGame(game)
@@ -389,11 +391,11 @@ def takuki_global():
         pais = elem_array[1]
         liga = elem_array[2]
         link = elem_array[4]
-        row_list = online.openURL(link)
+        row_list = online.openURL(link,0)
         gameList = createGames(row_list, liga)
-        print("ATUALIZAR JOGO...")
+        print("A ATUALIZAR " + pais + " - " + liga )
         atualizaJogos(gameList)
-        print("CALCULAR TAKUKI: " + str(gameList))
+        print("CALCULAR TAKUKI")
         calculaTakuki(gameList, pais, liga)
         gameList = resetList(gameList)
         row_list = resetList(row_list)
