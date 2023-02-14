@@ -229,22 +229,26 @@ def adicionarJogos(country, gameList):
 
 def atualizaJogos(gameList):
     for game in gameList:
-        #print("REALIZADO: " + game.getRealized() + " JORNADA: " + str(game.getRound()) + " data: " + game.getData() + " game: " + str(game.getHomeTeam()) + " - " + str(game.getAwayTeam()) )
-        if game.getRealized() == 'A':
-            id_game = db.getGame(game)
-            db.updateGame(id_game[0], game)
-        else:
-            if int(game.getRound()) <= 5:
-                if dta_today > game.getData():
-                    id_game = db.getGame(game)
-                    db.updateGame(id_game[0], game)
-                else: pass
+        id_game = db.getGame(game)
+        try:
+            #print("REALIZADO: " + game.getRealized() + " JORNADA: " + str(game.getRound()) + " data: " + game.getData() + " game: " + str(game.getHomeTeam()) + " - " + str(game.getAwayTeam()) )
+            if game.getRealized() == 'A':
+
+                db.updateGame(id_game[0], game)
             else:
-                if dta_today > game.getData():
-                    id_game = db.getGame(game)
-                    db.updateGame(id_game[0], game)
+                if int(game.getRound()) <= 5:
+                    if dta_today > game.getData():
+                        db.updateGame(id_game[0], game)
+                    else: pass
                 else:
-                    pass
+                    if dta_today > game.getData():
+                        db.updateGame(id_game[0], game)
+                    else:
+                        pass
+        except:
+            print("Falha no jogo com id " + str(id_game[0]))
+            exit(-1)
+
     return 0
 
 def calculaTakuki(gameList, country, league):

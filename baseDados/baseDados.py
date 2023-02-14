@@ -12,11 +12,12 @@ def connect():
         return None
 
 '''
+#UPDATE games SET goals_home =
 
 def connect():
     try:
         mydb = mysql.connector.connect(user='jguerreiro', password='2111986kramermania',
-                                       host='192.168.50.160',
+                                       host='192.168.1.78',
                                        database='takuki')
         return mydb
     except:
@@ -83,17 +84,22 @@ def getGame(game):
 
 
 def updateGame(id, game):
-    conn = connect()
-    mycursor = conn.cursor()
-    if game.getRealized() == 'A':
-        sql = "UPDATE games SET realized = 'A', game_date = '" + str(game.getData()) + "'WHERE id = '" + str(id) + "'"
-    else:
-        sql = "UPDATE games SET goals_home = '" + str(game.getHomeGoals()) + "', goals_away = '" + str(game.getAwayGoals())\
-              + "', realized = '" + game.getRealized() + "', total_goals = '" + str(game.getTotalGoals()) +\
-              "' ,game_date = '" + str(game.getData()) + "' WHERE id = '" + str(id) + "'"
-    print(sql)
-    mycursor.execute(sql)
-    conn.commit()
+    try:
+        conn = connect()
+        mycursor = conn.cursor()
+        if game.getRealized() == 'A':
+            sql = "UPDATE games SET realized = 'A', game_date = '" + str(game.getData()) + "'WHERE id = '" + str(id) + "'"
+        else:
+            sql = "UPDATE games SET goals_home = '" + str(game.getHomeGoals()) + "', goals_away = '" + str(game.getAwayGoals())\
+                  + "', realized = '" + game.getRealized() + "', total_goals = '" + str(game.getTotalGoals()) +\
+                  "' ,game_date = '" + str(game.getData()) + "' WHERE id = '" + str(id) + "'"
+        #print(sql)
+        mycursor.execute(sql)
+        conn.commit()
+    except:
+        print("Erro linha " + str(id) + "de base dados.")
+        print("Por favor corrigir")
+
     disconnect(conn)
     return
 
@@ -220,9 +226,13 @@ def calcula_estatistica(pais,liga):
     return cursor
 
 def updateDataJogo(id, data_jogo):
-    conn = connect()
-    mycursor = conn.cursor()
-    sql = "Update games set game_date = ' " + str(data_jogo) + "where id = '" + id + "'"
-    mycursor.execute(sql)
-    conn.commit()
-    disconnect(conn)
+    try:
+        conn = connect()
+        mycursor = conn.cursor()
+        sql = "Update games set game_date = ' " + str(data_jogo) + "where id = '" + str(id) + "'"
+        mycursor.execute(sql)
+        conn.commit()
+        disconnect(conn)
+    except:
+        print("Erro aceder base dados")
+        print("Fun: db.updateDataJogo")
