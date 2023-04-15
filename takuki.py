@@ -3,6 +3,7 @@ import Online.online as online
 import Objects.Leagues as obj
 import datetime
 import argparse
+import sys
 #from datetime import date
 
 # dd/mm/YY
@@ -410,7 +411,6 @@ def takuki_global():
         calculaTakuki(gameList, pais, liga)
         gameList = resetList(gameList)
         row_list = resetList(row_list)
-    return menu()
 
 def calcula_estatistica(pais,liga):
     cursor = db.calcula_estatistica(pais,liga)
@@ -610,4 +610,18 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-op', '--option',
+                        default='9',
+                        required=False,
+                        help='Option 9 is for update takuki_global',
+                        type=int
+                        )
+    args = parser.parse_args()
+
+    if len(sys.argv) == 1:
+        menu()
+    else:
+        takuki_global()
+        sys.exit(-1)
+
