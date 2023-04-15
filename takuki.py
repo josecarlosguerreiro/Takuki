@@ -2,6 +2,7 @@ import baseDados.baseDados as db
 import Online.online as online
 import Objects.Leagues as obj
 import datetime
+import argparse
 #from datetime import date
 
 # dd/mm/YY
@@ -104,57 +105,63 @@ def createGames(row_list, league):
             normal_season = str(td)
             if normal_season.__contains__('Época normal'):
                 pass
+            if normal_season.__contains__('Play-offs'):
+                print("ROW: " + str(normal_season))
+                break
             else:
-                rows = td.find_all('td')
-                '''
-                print('row 1 -->' + str(rows[1]))  ## Data do jogo
-                print('row 2 -->' + str(rows[2]))  ##equipa da casa
-                print('row 3 -->' + str(rows[3]))  ##golos equipa casa
-                print('row 4 -->' + str(rows[4]))  ##equipa de fora
-                print('row 5 -->' + str(rows[5]))  ##golos equipa fora
-                print('row 6 -->' + str(rows[6]))  ##
-                '''
+                try:
+                    rows = td.find_all('td')
+                    '''
+                    print('row 1 -->' + str(rows[1]))  ## Data do jogo
+                    print('row 2 -->' + str(rows[2]))  ##equipa da casa
+                    print('row 3 -->' + str(rows[3]))  ##golos equipa casa
+                    print('row 4 -->' + str(rows[4]))  ##equipa de fora
+                    print('row 5 -->' + str(rows[5]))  ##golos equipa fora
+                    print('row 6 -->' + str(rows[6]))  ##
+                    '''
+                    date_row = rows[1]
+                    date_game = obj.getDate(date_row)
+                    season = obj.getEpoca(date_game)
+                    homeTeam_row = rows[2]
+                    home_team = obj.getTeam(homeTeam_row)
+                    team_away_row = rows[4]
+                    team_away = obj.getTeam(team_away_row)
+                    res = rows[3]
+                    resultado = obj.getResultado(res)
 
-                date_row = rows[1]
-                date_game = obj.getDate(date_row)
-                season = obj.getEpoca(date_game)
-                homeTeam_row = rows[2]
-                home_team = obj.getTeam(homeTeam_row)
-                team_away_row = rows[4]
-                team_away = obj.getTeam(team_away_row)
-                res = rows[3]
-                resultado = obj.getResultado(res)
-
-                if resultado.__contains__('vs'):
-                    home_goals = ' '
-                    away_goals = ' '
-                else:
-                    home_goals = obj.golosCasa(resultado)
-                    away_goals = obj.golosFora(resultado)
-                    total_goals = int(home_goals) + int(away_goals)
-                round_row = rows[5]
-                round = obj.getRound(round_row)
-                #dy, dm, dd = [int(x) for x in date_game.split('-')]
-                #dy1, dm1, dd1 = [int(x) for x in dta_today.split('-')]
-                #dt_game = date(dy, dm, dd)
-                #dt_today = date(dy1, dm1, dd1)
-
-                if (dta_today > date_game):
-                    #and resultado.__contains__('vs'):
-                    if resultado.__contains__('-'):
-                        realized = 'Y'
+                    if resultado.__contains__('vs'):
+                        home_goals = ' '
+                        away_goals = ' '
                     else:
-                        realized = 'A'
-                #elif dta_today > date_game:
-                #    realized = 'A'
-                else:
-                    realized = 'N'
-                #print("Realizado: " + realized + " - JORNADA: " + round + " - Equipa Casa: " + home_team + " - Equipa Fora: " + team_away)
+                        home_goals = obj.golosCasa(resultado)
+                        away_goals = obj.golosFora(resultado)
+                        total_goals = int(home_goals) + int(away_goals)
+                    round_row = rows[5]
+                    round = obj.getRound(round_row)
+                    #dy, dm, dd = [int(x) for x in date_game.split('-')]
+                    #dy1, dm1, dd1 = [int(x) for x in dta_today.split('-')]
+                    #dt_game = date(dy, dm, dd)
+                    #dt_today = date(dy1, dm1, dd1)
+
+                    if (dta_today > date_game):
+                        #and resultado.__contains__('vs'):
+                        if resultado.__contains__('-'):
+                            realized = 'Y'
+                        else:
+                            realized = 'A'
+                    #elif dta_today > date_game:
+                    #    realized = 'A'
+                    else:
+                        realized = 'N'
+                    #print("Realizado: " + realized + " - JORNADA: " + round + " - Equipa Casa: " + home_team + " - Equipa Fora: " + team_away)
 
 
-                game = obj.obj_game(league, season, date_game, round, home_team, team_away, home_goals, away_goals,
-                                    realized, total_goals)
-                gameList.append(game)
+                    game = obj.obj_game(league, season, date_game, round, home_team, team_away, home_goals, away_goals,
+                                        realized, total_goals)
+                    gameList.append(game)
+                except:
+                    print("ERRO LINHA: " + str(rows) )
+                    pass
 
     return gameList
 
@@ -233,7 +240,6 @@ def atualizaJogos(gameList):
         try:
             #print("REALIZADO: " + game.getRealized() + " JORNADA: " + str(game.getRound()) + " data: " + game.getData() + " game: " + str(game.getHomeTeam()) + " - " + str(game.getAwayTeam()) )
             if game.getRealized() == 'A':
-
                 db.updateGame(id_game[0], game)
             else:
                 if int(game.getRound()) <= 5:
@@ -246,8 +252,9 @@ def atualizaJogos(gameList):
                     else:
                         pass
         except:
-            print("Falha no jogo com id " + str(id_game[0]))
+            print("Falha no jogo com id %s" % str(id_game[0]))
             exit(-1)
+
 
     return 0
 
@@ -565,6 +572,11 @@ def estatisticas():
 
 
 def menu():
+    try:
+        db.connect()
+    except:
+        exit(1)
+
     print("###########################################")
     print("##                                       ##")
     print("##               TAKUKI by JCG           ##")
