@@ -23,7 +23,7 @@ def connect():
     except:
         print("Erro ao aceder base dados.")
         return None
-
+'''
 
 def disconnect(connection):
     try:
@@ -157,9 +157,11 @@ def updateTakuki(game_id, dta_jogo, over05, over15, over25, over35, total, golos
     print("takuki25: " + over25)
     print("takuki35: " + over35)
 
-    sql = "update games set game_date = '" + str(dta_jogo) + "', takuki05 = '" + str(over05) + "', takuki15 = '" + str(over15) + "', takuki25 = '" + str(
-        over25) + "', takuki35 = '" + str(over35) + "', takuki_total = '" + str(total) + \
-          "', golos_prev_casa = '" + str(golos_m_eq_casa) + "', golos_prev_fora = '" + str(golos_m_eq_fora) + "' where id = '" + str(game_id) + "'"
+    sql = "UPDATE games SET game_date = '%s' , takuki05 = '%s' , takuki15 = '%s' , takuki25 = '%s', takuki35 = '%s', takuki_total = '%s', prev_goals_home_team = '%s', prev_goals_away_team = '%s' where id = '%s'" % (dta_jogo, over05, over15, over25, over35, total, golos_m_eq_casa, golos_m_eq_fora, game_id)
+
+    #sql = "update games set game_date = '" + str(dta_jogo) + "', takuki05 = '" + str(over05) + "', takuki15 = '" + str(over15) + "', takuki25 = '" + str(
+    #    over25) + "', takuki35 = '" + str(over35) + "', takuki_total = '" + str(total) + \
+    #      "', prev_goals_home_team = '" + str(golos_m_eq_casa) + "', prev_goals_away_team = '" + str(golos_m_eq_fora) + "' where id = '" + str(game_id) + "'"
     print("##########################################")
     mycursor.execute(sql)
     conn.commit()
@@ -208,7 +210,7 @@ def getMaxIdForRound(round):
 def nextRound(country, league):
     conn = connect()
     mycursor = conn.cursor()
-    sql = "SELECT min(round) FROM games where realized = 'N' and pais = '" + country + "' and league= '" + league + "'"
+    sql = "SELECT min(round) FROM games where realized = 'N' and country = '" + country + "' and league= '" + league + "'"
     print("SQL: " + sql)
     mycursor.execute(sql)
     round = mycursor.fetchone()
@@ -236,3 +238,46 @@ def updateDataJogo(id, data_jogo):
     except:
         print("Erro aceder base dados")
         print("Fun: db.updateDataJogo")
+
+def checkIfGamesExists(country, league, season):
+    try:
+        conn = connect()
+        mycursor = conn.cursor()
+        sql = "SELECT COUNT(id) from games where country = '%s' and league = '%s' and season = '%s'" % (country, league, season)
+        mycursor.execute(sql)
+        cursor = mycursor.fetchone()
+        disconnect(conn)
+        return cursor[0]
+    except:
+        print("Database error: %s" % checkIfGamesExists)
+
+def insertGame(country, league, season, game_date, round, home_team, away_team, realized):
+    argsList = [country, league, season, game_date, round, home_team, away_team, realized]
+    try:
+        conn = connect()
+        mycursor = conn.cursor()
+
+        result_args = mycursor.callproc('insertGame', argsList)
+        conn.commit()
+
+        if len(result_args) > 0:
+            res = 1
+        else:
+            res = 0
+        disconnect(conn)
+
+        return res
+    except:
+        print("Database error: %s" % insertGame)
+
+def getGames(country, league, season):
+    try:
+        conn = connect()
+        mycursor = conn.cursor()
+        sql = "SELECT * from games where country = '%s' and league = '%s' and season = '%s'" % (country, league, season)
+        mycursor.execute(sql)
+        cursor = mycursor.fetchall()
+        disconnect(conn)
+        return cursor
+    except:
+        print("Database error: %s" % checkIfGamesExists)

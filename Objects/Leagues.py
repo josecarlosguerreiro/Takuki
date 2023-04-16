@@ -59,7 +59,7 @@ def getDate(date_row):
     return date
 
 
-def getEpoca(game_date):
+def getEpoca(game_date, country):
     '''
     game_date: 2022-04-09
     '''
@@ -67,10 +67,14 @@ def getEpoca(game_date):
     #    print("get epoca.mes: " + game_date)
     mes = game_date[1]
     ano = game_date[0]
-    if (mes >= '08') and (mes <= '12'):
-        epoca = ano + '/' + str(int(ano) + 1)
+
+    if country == 'Brasil':
+        epoca = ano
     else:
-        epoca = str(int(ano) - 1) + '-' + ano
+        if (mes >= '07') and (mes <= '12'):
+            epoca = ano + '-' + str(int(ano) + 1)
+        else:
+            epoca = str(int(ano) - 1) + '-' + ano
     return epoca
 
 
