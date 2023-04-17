@@ -217,10 +217,10 @@ def nextRound(country, league):
     disconnect(conn)
     return round
 
-def calcula_estatistica(pais,liga):
+def calcula_estatistica(country, league):
     conn = connect()
     mycursor = conn.cursor()
-    sql = "SELECT * FROM games where realized = 'Y' and pais = '" + pais + "' and league= '" + liga + "' and takuki05 is not null"
+    sql = "SELECT * FROM games where realized = 'Y' and country = '" + country + "' and league= '" + league + "' and takuki05 is not null"
     print("SQL: " + sql)
     mycursor.execute(sql)
     cursor = mycursor.fetchall()
