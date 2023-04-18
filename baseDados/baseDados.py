@@ -23,7 +23,6 @@ def connect():
     except:
         print("Erro ao aceder base dados.")
         return None
-'''
 
 def disconnect(connection):
     try:
@@ -44,43 +43,6 @@ def getLeagues():
         return result
     except:
         return None
-
-
-def addGame(pais, game):
-    conn = connect()
-    mycursor = conn.cursor()
-    sql = "insert into games (pais, league, season, game_date, round, home_team, away_team, realized) values " \
-          "('" + pais + "', '" + game.getLeague() + "', '" + game.getSeason() + "', '" + game.getData() +"', '"\
-    + str(game.getRound()) + "', '" + game.getHomeTeam() + "', '" + game.getAwayTeam() +"', '" + game.getRealized() + "')"
-    mycursor.execute(sql)
-
-    conn.commit()
-    disconnect(conn)
-
-
-def getAllGames(league):
-    conn = connect()
-    mycursor = conn.cursor()
-    sql = "SELECT * FROM games where league = '" + league + "'"
-    mycursor.execute(sql)
-    myresult = mycursor.fetchall()
-    disconnect(conn)
-    return myresult
-
-
-def getGame(game):
-    conn = connect()
-    mycursor = conn.cursor()
-    #sql = "SELECT * FROM games WHERE league = '" + game.getLeague() + "' and season= '" + game.getSeason() + \
-    #      "' and game_date = '" + game.getData() + "' and round = '" + game.getRound() + "' and home_team = '" + \
-    #      game.getHomeTeam() + "' and away_team = '" + game.getAwayTeam() + "'"
-    sql = "SELECT * FROM games WHERE league = '" + game.getLeague() + "' and season= '" + game.getSeason() + \
-          "' and round = '" + game.getRound() + "' and home_team = '" + \
-          game.getHomeTeam() + "' and away_team = '" + game.getAwayTeam() + "'"
-    mycursor.execute(sql)
-    myresult = mycursor.fetchone()
-    disconnect(conn)
-    return myresult
 
 
 def updateGame(id, game):
@@ -124,27 +86,7 @@ def getAwayGames(team, round):
     return myresult
 
 
-def getAllTeamGames(team, round):
-    conn = connect()
-    mycursor = conn.cursor()
-    sql = "SELECT * FROM games where (home_team = '" + team + "' or away_team = '" + team + "')" + " and round <= '" + str(
-        round) + "'"
-    mycursor.execute(sql)
-    myresult = mycursor.fetchall()
-    disconnect(conn)
-    return myresult
 
-'''
-def updateTotalGoals(homeTeam, awayTeam, round, goals):
-    conn = connect()
-    mycursor = conn.cursor()
-    sql = "update games set total_goals = '" + str(
-        goals) + "' where home_team = '" + homeTeam + "' and away_team = '" + awayTeam + "' and round = '" + str(
-        round) + "' and realized = 'S'"
-    mycursor.execute(sql)
-    conn.commit()
-    disconnect(conn)
-'''
 
 def updateTakuki(game_id, dta_jogo, over05, over15, over25, over35, total, golos_m_eq_casa, golos_m_eq_fora):
     conn = connect()
@@ -168,45 +110,6 @@ def updateTakuki(game_id, dta_jogo, over05, over15, over25, over35, total, golos
     disconnect(conn)
 
 
-def calculateNextRound():
-    conn = connect()
-    mycursor = conn.cursor()
-    sql = "select round from games where order by id;"
-    mycursor.execute(sql)
-    myresult = mycursor.fetchone()
-    #print("myresult: " + str(myresult[0]))
-    disconnect(conn)
-    return myresult[0]
-
-
-def calculateNextGame(team, round):
-    conn = connect()
-    mycursor = conn.cursor()
-    sql = "SELECT id FROM games where (home_team = '" + team + "' or away_team = '" + team + "') and round = '" + str(round) + "'"
-    mycursor.execute(sql)
-    res_id = mycursor.fetchone()
-    disconnect(conn)
-    return res_id
-
-def getNextGame(id):
-    conn = connect()
-    mycursor = conn.cursor()
-    sql = "SELECT * FROM games where id = '" + str(id) + "'"
-    mycursor.execute(sql)
-    res_id = mycursor.fetchone()
-    disconnect(conn)
-    return res_id
-
-
-def getMaxIdForRound(round):
-    conn = connect()
-    mycursor = conn.cursor()
-    sql = "SELECT max(id) FROM games where round = '" + str(round) + "' and realized = 'N'"
-    mycursor.execute(sql)
-    res_id = mycursor.fetchone()
-    disconnect(conn)
-    return res_id
-
 def nextRound(country, league):
     conn = connect()
     mycursor = conn.cursor()
@@ -227,17 +130,6 @@ def calcula_estatistica(country, league):
     disconnect(conn)
     return cursor
 
-def updateDataJogo(id, data_jogo):
-    try:
-        conn = connect()
-        mycursor = conn.cursor()
-        sql = "Update games set game_date = ' " + str(data_jogo) + "where id = '" + str(id) + "'"
-        mycursor.execute(sql)
-        conn.commit()
-        disconnect(conn)
-    except:
-        print("Erro aceder base dados")
-        print("Fun: db.updateDataJogo")
 
 def checkIfGamesExists(country, league, season):
     try:
