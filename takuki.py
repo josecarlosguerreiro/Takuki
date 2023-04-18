@@ -442,8 +442,8 @@ def takuki_global():
         game_list = resetList(game_list)
         row_list = resetList(row_list)
 
-def calcula_estatistica(pais,liga):
-    cursor = db.calcula_estatistica(pais,liga)
+def calcula_estatistica(country, league):
+    cursor = db.calcula_estatistica(country, league)
 
     lista_tak_05 = []
     lista_tak_15 = []
@@ -454,11 +454,11 @@ def calcula_estatistica(pais,liga):
     over_25 = 2.5
     over_35 = 3.5
     for i in cursor:
-        total_golos = i[14]
-        tak_05 = i[10]
-        tak_15 = i[11]
-        tak_25 = i[12]
-        tak_35 = i[13]
+        total_golos = i[15]
+        tak_05 = i[11]
+        tak_15 = i[12]
+        tak_25 = i[13]
+        tak_35 = i[14]
 
         if total_golos >= over_05:
             if tak_05 == 'NO BET':
