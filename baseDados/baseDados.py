@@ -16,13 +16,15 @@ def connect():
 
 def connect():
     try:
-        mydb = mysql.connector.connect(user='jguerreiro', password='2111986kramermania',
-                                       host='192.168.1.78',
+        mydb = mysql.connector.connect(user='jguerreiro', password='6508ze',
+                                       host='192.168.1.72',
+                                       port='3306',
                                        database='takuki')
         return mydb
     except:
         print("Erro ao aceder base dados.")
         return None
+
 
 def disconnect(connection):
     try:

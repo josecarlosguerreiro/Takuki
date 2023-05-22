@@ -31,6 +31,7 @@ def getHomeGames(team, round, homeAway):
     #print("homeAway: %s" % homeAway)
     if homeAway == 'home':
         res = db.getHomeGames(team, round - 1)
+
         for game in res:
             if game[9] == 'A':
                 pass
@@ -100,7 +101,7 @@ def getHomeGames(team, round, homeAway):
                 over15_away, over25_away]
 
 
-def translateGames(row_list, country, league):
+def translateGames(row_list, country, league, season):
     """
     translate from html to real data to be manipulated
     """
@@ -126,11 +127,13 @@ def translateGames(row_list, country, league):
                     '''
                     date_row = rows[1]
                     date_game = obj.getDate(date_row)
-                    season = obj.getEpoca(date_game,country)
+                    #season = obj.getEpoca(date_game,country)
                     homeTeam_row = rows[2]
                     home_team = obj.getTeam(homeTeam_row)
+                    home_team = updateTeamName(home_team)
                     team_away_row = rows[4]
                     team_away = obj.getTeam(team_away_row)
+                    team_away = updateTeamName(team_away)
                     res = rows[3]
                     result = obj.getResultado(res)
 
@@ -143,7 +146,6 @@ def translateGames(row_list, country, league):
                         total_goals = int(home_goals) + int(away_goals)
                     round_row = rows[5]
                     round = obj.getRound(round_row)
-
                     if (dta_today > date_game):
                         if result.__contains__('-'):
                             realized = 'Y'
@@ -152,9 +154,12 @@ def translateGames(row_list, country, league):
                     else:
                         realized = 'N'
 
-                    game = obj.obj_game(league, season, date_game, round, home_team, team_away, home_goals, away_goals,
-                                        realized, total_goals)
-                    game_list_translated.append(game)
+                    if round is None:
+                        pass
+                    else:
+                        game = obj.obj_game(league, season, date_game, round, home_team, team_away, home_goals, away_goals,
+                                                realized, total_goals)
+                        game_list_translated.append(game)
                 except:
                     print("ERRO LINHA: " + str(rows) )
 
@@ -162,11 +167,11 @@ def translateGames(row_list, country, league):
 
     return game_list_translated
 
-def insertGames(row_list, country, league):
+def insertGames(row_list, country, league, season):
     for item in row_list:
         for td in item:
             normal_season = str(td)
-            if normal_season.__contains__('Época normal'):
+            if normal_season.__contains__('Época normal') or normal_season.__contains__('Regular Season'):
                 pass
             if normal_season.__contains__('Play-offs'):
                 break
@@ -183,7 +188,6 @@ def insertGames(row_list, country, league):
                     '''
                     date_row = rows[1]
                     game_date = obj.getDate(date_row)
-                    season = obj.getEpoca(game_date, country)
                     home_team_row = rows[2]
                     home_team = obj.getTeam(home_team_row)
                     away_team_row = rows[4]
@@ -191,7 +195,11 @@ def insertGames(row_list, country, league):
 
                     round_row = rows[5]
                     round = obj.getRound(round_row)
+
                     realized = 'N'
+
+                    home_team = updateTeamName(home_team)
+                    away_team = updateTeamName(away_team)
 
                     result = db.insertGame(country, league, season, game_date, round, home_team, away_team, realized)
                 except:
@@ -215,7 +223,7 @@ def takuki_menu():
     leagues = carregaLigas()
     for i, league in enumerate(leagues):
         i += 1
-        print(str(i) + " - " + league[1] + " - " + league[2])
+        print(str(i) + " - " + league[1] + " - " + league[2] + " - " + league[3])
         cont = i
     print("0 - Exit")
 
@@ -242,15 +250,15 @@ def takuki():
     row_list = online.openURL(url_link, 0)
     counter = checkIfGamesExists(country, league, season)
     if counter == 0:
-        insertGames(row_list, country, league)
+        insertGames(row_list, country, league, season)
     else:
         pass
     
     print("A ATUALIZAR " + country + " - " + league )
-    game_list_translated = translateGames(row_list, country, league)
+    game_list_translated = translateGames(row_list, country, league, season)
     game_list = getGames(country, league, season)
     updateGames(game_list_translated, game_list)
-    updateTakuki(game_list, country, league)
+    updateTakuki(game_list, country, league, season)
     game_list = resetList(game_list)
     row_list = resetList(row_list)
 
@@ -270,16 +278,18 @@ def getGames(country, league, season):
 def updateGames(game_list_translated, game_list):
     size_list = len(game_list_translated)
     i = 0
+
     while i < size_list:
         home_team_translated = game_list_translated[i].getHomeTeam()
         away_team_translated = game_list_translated[i].getAwayTeam()
 
+        home_team = updateTeamName(home_team_translated)
+        away_team = updateTeamName(away_team_translated)
+
         home_team_list = game_list[i][6]
         away_team_list = game_list[i][7]
 
-        epoca = game_list[i][3]
-
-        if home_team_translated == home_team_list and away_team_translated == away_team_list:
+        if home_team == home_team_list and away_team == away_team_list:
             if game_list_translated[i].getData() < dta_today:
                 db.updateGame(epoca, game_list_translated[i])
             else:
@@ -289,9 +299,9 @@ def updateGames(game_list_translated, game_list):
         i += 1
 
 
-def updateTakuki(game_list, country, league):
+def updateTakuki(game_list, country, league, season):
 
-    nextRound = db.nextRound(country, league)[0]
+    nextRound = db.nextRound(country, league, season)[0]
 
     for game in game_list:
         #game[11] --> takuki05
@@ -413,11 +423,29 @@ def updateTakuki(game_list, country, league):
                         tip_over35 = "NO BET"
                     if total > 4:
                         tip_over35 = "OVER"
-                # print("updateTakuki:" + str(id_game[0]) + " | " + str(tip_over15) + " | " + str(tip_over25) + " | " + str(tip_over35) + " | " + str(total))
+                #print("updateTakuki:" + str(game[0]) + " | " + str(tip_over15) + " | " + str(tip_over25) + " | " + str(tip_over35) + " | " + str(total))
                 db.updateTakuki(game[0], game[4], tip_over05, tip_over15, tip_over25, tip_over35, total,
                                 home_scored_t1 / home_games_t1, away_scored_t2 / away_games_t2)
 
 
+def checkTakukiAlreadyCalculated(game_list):
+    #calcular a proxima jornada
+    #fazer um select na bd para verificar se os campos takuki ja estao preenchidos
+
+    for game in game_list:
+        game_id = game[0]
+        db.checkTakukiAlreadyCalculated(game_id)
+
+
+    return 0
+
+def updateTeamName(teamName):
+    if teamName == 'Borussia M\'gladbach':
+       teamName = 'Borussia Mönchengladbach'
+    else:
+        pass
+
+    return teamName
 
 def takuki_global():
     array_ligas = carregaLigas()
@@ -430,17 +458,17 @@ def takuki_global():
         season = elem_array[3]
         link = elem_array[4]
 
-        row_list = online.openURL(link,0)
+        row_list = online.openURL(link, 0)
         counter = checkIfGamesExists(country, league, season)
         if counter == 0:
-            insertGames(row_list, country, league)
+            insertGames(row_list, country, league, season)
         else:
             pass
-        print("A ATUALIZAR " + country + " - " + league )
-        game_list_translated = translateGames(row_list, country, league)
+        print("A ATUALIZAR " + country + " - " + league + " - " + season)
+        game_list_translated = translateGames(row_list, country, league, season)
         game_list = getGames(country, league, season)
         updateGames(game_list_translated, game_list)
-        updateTakuki(game_list, country, league)
+        updateTakuki(game_list, country, league, season)
         game_list = resetList(game_list)
         row_list = resetList(row_list)
 
