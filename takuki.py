@@ -277,9 +277,11 @@ def updateGames(game_list_translated, game_list):
         home_team_list = game_list[i][6]
         away_team_list = game_list[i][7]
 
+        epoca = game_list[i][3]
+
         if home_team_translated == home_team_list and away_team_translated == away_team_list:
             if game_list_translated[i].getData() < dta_today:
-                db.updateGame(game_list[i][0], game_list_translated[i])
+                db.updateGame(epoca, game_list_translated[i])
             else:
                 pass
         else:
