@@ -289,13 +289,24 @@ def updateGames(game_list_translated, game_list):
         home_team_list = game_list[i][6]
         away_team_list = game_list[i][7]
 
-        if home_team == home_team_list and away_team == away_team_list:
-            if game_list_translated[i].getData() < dta_today:
-                db.updateGame(epoca, game_list_translated[i])
-            else:
-                pass
-        else:
-            pass
+        season = game_list_translated[i].getSeason()
+        data = game_list_translated[i].getData()
+        realized = game_list_translated[i].getRealized()
+        home_goals = game_list_translated[i].getHomeGoals()
+        away_goals = game_list_translated[i].getAwayGoals()
+
+        total_goals = int(home_goals) + int(away_goals)
+        db.updateGame(season, data, realized, home_team_translated, home_goals, away_team_translated, away_goals, total_goals)
+
+        #if home_team_translated == home_team_list and away_team_translated == away_team_list:
+        #    if game_list_translated[i].getData() < dta_today:
+        #        db.updateGame(epoca, game_list_translated[i])
+
+        #    else:
+        #        id = db.getOneGame(home_team_translated, away_team_translated, epoca)
+        #        pass
+        #else:
+        #    pass
         i += 1
 
 
