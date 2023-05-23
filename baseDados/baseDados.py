@@ -16,9 +16,8 @@ def connect():
 
 def connect():
     try:
-        mydb = mysql.connector.connect(user='jguerreiro', password='6508ze',
+        mydb = mysql.connector.connect(user='jguerreiro', password='2111986kramermania',
                                        host='192.168.1.72',
-                                       port='3306',
                                        database='takuki')
         return mydb
     except:
@@ -47,22 +46,26 @@ def getLeagues():
         return None
 
 
-def updateGame(id, game):
+def updateGame(season, data, realized, home_team_translated, home_goals, away_team_translated, away_goals):
     try:
         conn = connect()
         mycursor = conn.cursor()
-        if game.getRealized() == 'A':
-            sql = "UPDATE games SET realized = 'A', game_date = '" + str(game.getData()) + "'WHERE id = '" + str(id) + "'"
+        if realized == 'A':
+            sql = "UPDATE games SET realized = 'A', game_date = '%s' WHERE home_team = '%s' and away_team = '%s' and season = '%s'" % (data, home_team_translated, away_team_translated, season)
+            mycursor.execute(sql)
+            conn.commit()
+        if realized == 'Y':
+            sql = "UPDATE games SET goals_home = '%s', goals_away = '%s', realized = '%s', total_goals = '%s' ,game_date = '%s' WHERE home_team = '%s' and away_team = '%s' and season = '%s'" % (home_goals, away_goals, realized, int(home_goals) + int(away_goals), data, home_team_translated, away_team_translated, season)
+            mycursor.execute(sql)
+            conn.commit()
         else:
-            sql = "UPDATE games SET goals_home = '" + str(game.getHomeGoals()) + "', goals_away = '" + str(game.getAwayGoals())\
-                  + "', realized = '" + game.getRealized() + "', total_goals = '" + str(game.getTotalGoals()) +\
-                  "' ,game_date = '" + str(game.getData()) + "' WHERE id = '" + str(id) + "'"
+            pass
         #print(sql)
-        mycursor.execute(sql)
-        conn.commit()
-    except:
-        print("Erro linha " + str(id) + "de base dados.")
+
+    except Exception as error:
+        print("Erro linha de base dados." + str(error))
         print("Por favor corrigir")
+        exit(1)
 
     disconnect(conn)
     return

@@ -152,7 +152,10 @@ def translateGames(row_list, country, league, season):
                         else:
                             realized = 'A'
                     else:
-                        realized = 'N'
+                        #if result.__contains__('-'):
+                        #    realized = 'Y'
+                        #else:
+                            realized = 'N'
 
                     if round is None:
                         pass
@@ -190,8 +193,10 @@ def insertGames(row_list, country, league, season):
                     game_date = obj.getDate(date_row)
                     home_team_row = rows[2]
                     home_team = obj.getTeam(home_team_row)
+                    home_team = updateTeamName(home_team)
                     away_team_row = rows[4]
                     away_team = obj.getTeam(away_team_row)
+                    away_team = updateTeamName(away_team)
 
                     round_row = rows[5]
                     round = obj.getRound(round_row)
@@ -283,11 +288,8 @@ def updateGames(game_list_translated, game_list):
         home_team_translated = game_list_translated[i].getHomeTeam()
         away_team_translated = game_list_translated[i].getAwayTeam()
 
-        home_team = updateTeamName(home_team_translated)
-        away_team = updateTeamName(away_team_translated)
-
-        home_team_list = game_list[i][6]
-        away_team_list = game_list[i][7]
+        # home_team_list = game_list[i][6]
+        #away_team_list = game_list[i][7]
 
         season = game_list_translated[i].getSeason()
         data = game_list_translated[i].getData()
@@ -295,8 +297,8 @@ def updateGames(game_list_translated, game_list):
         home_goals = game_list_translated[i].getHomeGoals()
         away_goals = game_list_translated[i].getAwayGoals()
 
-        total_goals = int(home_goals) + int(away_goals)
-        db.updateGame(season, data, realized, home_team_translated, home_goals, away_team_translated, away_goals, total_goals)
+        #total_goals = int(home_goals) + int(away_goals)
+        db.updateGame(season, data, realized, home_team_translated, home_goals, away_team_translated, away_goals)
 
         #if home_team_translated == home_team_list and away_team_translated == away_team_list:
         #    if game_list_translated[i].getData() < dta_today:
@@ -438,10 +440,13 @@ def updateTakuki(game_list, country, league, season):
                 db.updateTakuki(game[0], game[4], tip_over05, tip_over15, tip_over25, tip_over35, total,
                                 home_scored_t1 / home_games_t1, away_scored_t2 / away_games_t2)
 
+def updateTeamName(teamName):
+    if teamName == 'Borussia M\'gladbach':
+       teamName = 'Borussia Mönchengladbach'
+    else:
+        pass
 
-def checkTakukiAlreadyCalculated(game_list):
-    #calcular a proxima jornada
-    #fazer um select na bd para verificar se os campos takuki ja estao preenchidos
+    return teamName
 
     for game in game_list:
         game_id = game[0]
