@@ -115,10 +115,10 @@ def updateTakuki(game_id, dta_jogo, over05, over15, over25, over35, total, golos
     disconnect(conn)
 
 
-def nextRound(country, league):
+def nextRound(country, league, season):
     conn = connect()
     mycursor = conn.cursor()
-    sql = "SELECT min(round) FROM games where realized = 'N' and country = '" + country + "' and league= '" + league + "'"
+    sql = "SELECT min(round) FROM games where realized = 'N' and country = '" + country + "' and league= '" + league + "' and season ='" + season + "'"
     print("SQL: " + sql)
     mycursor.execute(sql)
     round = mycursor.fetchone()
