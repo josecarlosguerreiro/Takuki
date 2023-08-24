@@ -56,10 +56,14 @@ def updateGame(season, data, realized, home_team_translated, home_goals, away_te
             conn.commit()
         if realized == 'Y':
             sql = "UPDATE games SET goals_home = '%s', goals_away = '%s', realized = '%s', total_goals = '%s' ,game_date = '%s' WHERE home_team = '%s' and away_team = '%s' and season = '%s'" % (home_goals, away_goals, realized, int(home_goals) + int(away_goals), data, home_team_translated, away_team_translated, season)
+            #print("SQL -->" + sql)
             mycursor.execute(sql)
             conn.commit()
         else:
-            pass
+            sql = "UPDATE games SET game_date = '%s' WHERE home_team = '%s' and away_team = '%s' and season = '%s'" % (data, home_team_translated, away_team_translated, season)
+            # print("SQL -->" + sql)
+            mycursor.execute(sql)
+            conn.commit()
         #print(sql)
 
     except Exception as error:
@@ -97,15 +101,23 @@ def updateTakuki(game_id, dta_jogo, over05, over15, over25, over35, total, golos
     conn = connect()
     mycursor = conn.cursor()
 
+    game = getGameByID(game_id)
+    #for g in game:
+    #    print(g)
+    eq_casa = game[6]
+    eq_fora = game[7]
+
     print("ID: " + str(game_id))
     print("Dta_Jogo: " + dta_jogo)
+    print("Jogo: %s - %s" % (eq_casa, eq_fora) )
     print("takuki05: " + over05)
     print("takuki15: " + over15)
     print("takuki25: " + over25)
     print("takuki35: " + over35)
 
     sql = "UPDATE games SET game_date = '%s' , takuki05 = '%s' , takuki15 = '%s' , takuki25 = '%s', takuki35 = '%s', takuki_total = '%s', prev_goals_home_team = '%s', prev_goals_away_team = '%s' where id = '%s'" % (dta_jogo, over05, over15, over25, over35, total, golos_m_eq_casa, golos_m_eq_fora, game_id)
-
+    #print(sql)
+    #print("@@@@@@@@")
     #sql = "update games set game_date = '" + str(dta_jogo) + "', takuki05 = '" + str(over05) + "', takuki15 = '" + str(over15) + "', takuki25 = '" + str(
     #    over25) + "', takuki35 = '" + str(over35) + "', takuki_total = '" + str(total) + \
     #      "', prev_goals_home_team = '" + str(golos_m_eq_casa) + "', prev_goals_away_team = '" + str(golos_m_eq_fora) + "' where id = '" + str(game_id) + "'"
@@ -174,6 +186,19 @@ def getGames(country, league, season):
         sql = "SELECT * from games where country = '%s' and league = '%s' and season = '%s'" % (country, league, season)
         mycursor.execute(sql)
         cursor = mycursor.fetchall()
+        disconnect(conn)
+        return cursor
+    except:
+        print("Database error: %s" % checkIfGamesExists)
+
+
+def getGameByID(id):
+    try:
+        conn = connect()
+        mycursor = conn.cursor()
+        sql = "SELECT * from games where id = '%s'" % (id)
+        mycursor.execute(sql)
+        cursor = mycursor.fetchone()
         disconnect(conn)
         return cursor
     except:
